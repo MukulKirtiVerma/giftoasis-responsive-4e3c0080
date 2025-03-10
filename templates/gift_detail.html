@@ -1,0 +1,55 @@
+
+{% extends 'base.html' %}
+
+{% block title %}{{ gift.name }} - GiftOasis{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-6xl mx-auto">
+        <div class="mb-6">
+            <a href="{{ url_for('categories') }}" class="text-purple-600 hover:text-purple-700 flex items-center">
+                <span class="mr-2">←</span> Back to Gifts
+            </a>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-md overflow-hidden">
+            <div class="md:flex">
+                <div class="md:w-1/2">
+                    <img src="{{ gift.image_url }}" alt="{{ gift.name }}" class="w-full h-96 object-cover">
+                </div>
+                <div class="md:w-1/2 p-6">
+                    <h1 class="text-3xl font-bold text-gray-800 mb-4">{{ gift.name }}</h1>
+                    <div class="mb-4">
+                        <span class="bg-gray-200 text-gray-700 px-3 py-1 rounded-full text-sm">{{ gift.category }}</span>
+                        {% if gift.is_featured %}
+                            <span class="bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-sm ml-2">Featured</span>
+                        {% endif %}
+                    </div>
+                    <p class="text-gray-600 mb-6">{{ gift.description }}</p>
+                    <p class="text-2xl font-bold text-purple-600 mb-6">${{ gift.price }}</p>
+                    
+                    {% if wishlists %}
+                        <div class="mb-6">
+                            <h3 class="text-lg font-semibold mb-2">Add to Wishlist</h3>
+                            <div class="space-y-2">
+                                {% for wishlist in wishlists %}
+                                <form method="POST" action="{{ url_for('add_to_wishlist', wishlist_id=wishlist.id, gift_id=gift.id) }}">
+                                    <button type="submit" class="bg-white border border-purple-600 text-purple-600 hover:bg-purple-50 px-4 py-2 rounded w-full text-left">
+                                        {{ wishlist.name }}
+                                    </button>
+                                </form>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="mb-6">
+                            <p class="text-gray-600">You don't have any wishlists yet.</p>
+                            <a href="{{ url_for('create_wishlist') }}" class="text-purple-600 hover:underline">Create a wishlist</a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

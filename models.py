@@ -2,6 +2,7 @@
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
+from datetime import datetime
 
 db = SQLAlchemy()
 
@@ -11,6 +12,7 @@ class User(UserMixin, db.Model):
     email = db.Column(db.String(100), unique=True, nullable=False)
     password_hash = db.Column(db.String(200))
     is_google = db.Column(db.Boolean, default=False)
+    wishlists = db.relationship('Wishlist', backref='user', lazy=True)
     
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -19,3 +21,27 @@ class User(UserMixin, db.Model):
         if self.is_google:
             return False
         return check_password_hash(self.password_hash, password)
+
+class Gift(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    description = db.Column(db.Text, nullable=True)
+    price = db.Column(db.Float, nullable=False)
+    image_url = db.Column(db.String(200), nullable=True)
+    category = db.Column(db.String(50), nullable=False)
+    is_featured = db.Column(db.Boolean, default=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    wishlist_items = db.relationship('WishlistItem', backref='gift', lazy=True)
+
+class Wishlist(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    items = db.relationship('WishlistItem', backref='wishlist', lazy=True)
+
+class WishlistItem(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    wishlist_id = db.Column(db.Integer, db.ForeignKey('wishlist.id'), nullable=False)
+    gift_id = db.Column(db.Integer, db.ForeignKey('gift.id'), nullable=False)
+    added_at = db.Column(db.DateTime, default=datetime.utcnow)

@@ -1,0 +1,42 @@
+
+{% extends 'base.html' %}
+
+{% block title %}My Wishlists - GiftOasis{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-7xl mx-auto">
+        <div class="flex justify-between items-center mb-8">
+            <h1 class="text-3xl font-bold text-gray-800">My Wishlists</h1>
+            <a href="{{ url_for('create_wishlist') }}" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded">
+                Create New Wishlist
+            </a>
+        </div>
+
+        {% if wishlists %}
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {% for wishlist in wishlists %}
+                    <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                        <div class="p-6">
+                            <h2 class="text-xl font-semibold mb-2">{{ wishlist.name }}</h2>
+                            <p class="text-gray-600 mb-4">Created on {{ wishlist.created_at.strftime('%B %d, %Y') }}</p>
+                            <p class="text-gray-600 mb-4">{{ wishlist.items|length }} items</p>
+                            <a href="{{ url_for('wishlist_detail', wishlist_id=wishlist.id) }}" class="text-purple-600 hover:text-purple-700 font-medium">
+                                View Wishlist →
+                            </a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="bg-white rounded-lg shadow-md p-8 text-center">
+                <h3 class="text-xl font-semibold text-gray-800 mb-4">You don't have any wishlists yet</h3>
+                <p class="text-gray-600 mb-6">Create your first wishlist to start saving your favorite gifts.</p>
+                <a href="{{ url_for('create_wishlist') }}" class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded inline-block">
+                    Create a Wishlist
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

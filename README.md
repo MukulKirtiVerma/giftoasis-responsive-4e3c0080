@@ -54,7 +54,15 @@ Create a MySQL database named `giftoasis`:
 CREATE DATABASE giftoasis;
 ```
 
-### 5. Run the application
+### 5. Initialize the database
+
+```bash
+python init_db.py
+```
+
+This will create all necessary tables and add sample data.
+
+### 6. Run the application
 
 ```bash
 flask run
@@ -84,3 +92,17 @@ The application comes with a default user:
 - Responsive design
 - Gift browsing and filtering
 - Categories and featured gifts
+- Wishlist creation and management
+- Add/remove items from wishlists
+
+## Application Structure
+
+- `app.py`: Main application file with all routes and configuration
+- `models.py`: Database models for User, Gift, Wishlist, and WishlistItem
+- `forms.py`: WTForms for login, signup, and wishlist creation
+- `templates/`: HTML templates using Jinja2 and Tailwind CSS
+- `init_db.py`: Script to initialize the database with default user and sample gifts
+
+## Protected Routes
+
+All routes except the homepage, login, and signup pages require authentication. Users will be redirected to the login page if they try to access these routes without being logged in.

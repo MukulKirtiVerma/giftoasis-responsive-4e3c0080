@@ -1,6 +1,6 @@
 
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, BooleanField, SubmitField
+from wtforms import StringField, PasswordField, BooleanField, SubmitField, TextAreaField, FloatField
 from wtforms.validators import DataRequired, Email, Length, EqualTo
 
 class LoginForm(FlaskForm):
@@ -21,3 +21,7 @@ class SignupForm(FlaskForm):
         EqualTo('password', message='Passwords must match')
     ])
     submit = SubmitField('Sign Up')
+
+class WishlistForm(FlaskForm):
+    name = StringField('Wishlist Name', validators=[DataRequired(), Length(min=1, max=100)])
+    submit = SubmitField('Create Wishlist')

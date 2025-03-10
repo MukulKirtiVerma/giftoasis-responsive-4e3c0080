@@ -1,11 +1,11 @@
 
-from flask import Flask, render_template, redirect, url_for, flash, request, session
+from flask import Flask, render_template, redirect, url_for, flash, request, session, jsonify
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from dotenv import load_dotenv
 from authlib.integrations.flask_client import OAuth
 import os
-from models import db, User
-from forms import LoginForm, SignupForm
+from models import db, User, Gift, Wishlist, WishlistItem
+from forms import LoginForm, SignupForm, WishlistForm
 
 # Load environment variables
 load_dotenv()
@@ -45,7 +45,8 @@ def load_user(user_id):
 # Routes
 @app.route('/')
 def index():
-    return render_template('index.html')
+    featured_gifts = Gift.query.filter_by(is_featured=True).limit(4).all()
+    return render_template('index.html', featured_gifts=featured_gifts)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -123,17 +124,103 @@ def google_auth():
 @app.route('/categories')
 @login_required
 def categories():
-    return render_template('categories.html')
+    gift_categories = db.session.query(Gift.category).distinct().all()
+    categories_list = [cat[0] for cat in gift_categories]
+    return render_template('categories.html', categories=categories_list)
 
 @app.route('/featured')
 @login_required
 def featured():
-    return render_template('featured.html')
+    featured_gifts = Gift.query.filter_by(is_featured=True).all()
+    return render_template('featured.html', gifts=featured_gifts)
+
+@app.route('/category/<category>')
+@login_required
+def category_gifts(category):
+    gifts = Gift.query.filter_by(category=category).all()
+    return render_template('category_gifts.html', category=category, gifts=gifts)
+
+@app.route('/gift/<int:gift_id>')
+@login_required
+def gift_detail(gift_id):
+    gift = Gift.query.get_or_404(gift_id)
+    user_wishlists = Wishlist.query.filter_by(user_id=current_user.id).all()
+    return render_template('gift_detail.html', gift=gift, wishlists=user_wishlists)
 
 @app.route('/how-it-works')
 @login_required
 def how_it_works():
     return render_template('how_it_works.html')
+
+# Wishlist routes
+@app.route('/wishlists')
+@login_required
+def wishlists():
+    user_wishlists = Wishlist.query.filter_by(user_id=current_user.id).all()
+    return render_template('wishlists.html', wishlists=user_wishlists)
+
+@app.route('/wishlist/new', methods=['GET', 'POST'])
+@login_required
+def create_wishlist():
+    form = WishlistForm()
+    if form.validate_on_submit():
+        wishlist = Wishlist(
+            name=form.name.data,
+            user_id=current_user.id
+        )
+        db.session.add(wishlist)
+        db.session.commit()
+        flash('Wishlist created successfully!', 'success')
+        return redirect(url_for('wishlists'))
+    return render_template('create_wishlist.html', form=form)
+
+@app.route('/wishlist/<int:wishlist_id>')
+@login_required
+def wishlist_detail(wishlist_id):
+    wishlist = Wishlist.query.get_or_404(wishlist_id)
+    if wishlist.user_id != current_user.id:
+        flash('You do not have permission to view this wishlist', 'danger')
+        return redirect(url_for('wishlists'))
+    
+    items = WishlistItem.query.filter_by(wishlist_id=wishlist_id).all()
+    gifts = [Gift.query.get(item.gift_id) for item in items]
+    return render_template('wishlist_detail.html', wishlist=wishlist, gifts=gifts)
+
+@app.route('/wishlist/<int:wishlist_id>/add/<int:gift_id>', methods=['POST'])
+@login_required
+def add_to_wishlist(wishlist_id, gift_id):
+    wishlist = Wishlist.query.get_or_404(wishlist_id)
+    if wishlist.user_id != current_user.id:
+        flash('You do not have permission to modify this wishlist', 'danger')
+        return redirect(url_for('wishlists'))
+    
+    # Check if item already in wishlist
+    existing_item = WishlistItem.query.filter_by(wishlist_id=wishlist_id, gift_id=gift_id).first()
+    if existing_item:
+        flash('This item is already in your wishlist', 'info')
+    else:
+        item = WishlistItem(wishlist_id=wishlist_id, gift_id=gift_id)
+        db.session.add(item)
+        db.session.commit()
+        flash('Item added to wishlist successfully!', 'success')
+    
+    return redirect(url_for('wishlist_detail', wishlist_id=wishlist_id))
+
+@app.route('/wishlist/<int:wishlist_id>/remove/<int:gift_id>', methods=['POST'])
+@login_required
+def remove_from_wishlist(wishlist_id, gift_id):
+    wishlist = Wishlist.query.get_or_404(wishlist_id)
+    if wishlist.user_id != current_user.id:
+        flash('You do not have permission to modify this wishlist', 'danger')
+        return redirect(url_for('wishlists'))
+    
+    item = WishlistItem.query.filter_by(wishlist_id=wishlist_id, gift_id=gift_id).first()
+    if item:
+        db.session.delete(item)
+        db.session.commit()
+        flash('Item removed from wishlist successfully!', 'success')
+    
+    return redirect(url_for('wishlist_detail', wishlist_id=wishlist_id))
 
 # Create tables within application context
 with app.app_context():
