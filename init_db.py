@@ -1,6 +1,6 @@
 
 from app import app, db
-from models import User, Gift, Wishlist, WishlistItem
+from models import User, Gift, Wishlist, WishlistItem, Notification
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 
@@ -18,7 +18,11 @@ def init_db():
             admin_user = User(
                 name="Rahul Singh",
                 email="rahulsingh60verma@gmail.com",
-                is_google=False
+                is_google=False,
+                bio="GiftHero admin and gift enthusiast",
+                facebook_url="https://facebook.com/gifthero",
+                twitter_url="https://twitter.com/gifthero",
+                instagram_url="https://instagram.com/gifthero"
             )
             admin_user.set_password("rahul@123A")
             db.session.add(admin_user)
@@ -36,7 +40,8 @@ def init_db():
                     "price": 199.99,
                     "image_url": "https://placehold.co/600x400?text=Smart+Watch",
                     "category": "Electronics",
-                    "is_featured": True
+                    "is_featured": True,
+                    "source_url": "https://example.com/smartwatch"
                 },
                 {
                     "name": "Leather Wallet",
@@ -44,7 +49,8 @@ def init_db():
                     "price": 49.99,
                     "image_url": "https://placehold.co/600x400?text=Leather+Wallet",
                     "category": "Accessories",
-                    "is_featured": True
+                    "is_featured": True,
+                    "source_url": "https://example.com/wallet"
                 },
                 {
                     "name": "Scented Candle Set",
@@ -52,7 +58,8 @@ def init_db():
                     "price": 29.99,
                     "image_url": "https://placehold.co/600x400?text=Candle+Set",
                     "category": "Home Decor",
-                    "is_featured": True
+                    "is_featured": True,
+                    "source_url": "https://example.com/candles"
                 },
                 {
                     "name": "Wireless Earbuds",
@@ -60,7 +67,8 @@ def init_db():
                     "price": 129.99,
                     "image_url": "https://placehold.co/600x400?text=Wireless+Earbuds",
                     "category": "Electronics",
-                    "is_featured": True
+                    "is_featured": True,
+                    "source_url": "https://example.com/earbuds"
                 },
                 {
                     "name": "Gourmet Chocolate Box",
@@ -68,7 +76,8 @@ def init_db():
                     "price": 34.99,
                     "image_url": "https://placehold.co/600x400?text=Chocolate+Box",
                     "category": "Food & Beverages",
-                    "is_featured": False
+                    "is_featured": False,
+                    "source_url": "https://example.com/chocolates"
                 },
                 {
                     "name": "Yoga Mat",
@@ -76,7 +85,44 @@ def init_db():
                     "price": 24.99,
                     "image_url": "https://placehold.co/600x400?text=Yoga+Mat",
                     "category": "Fitness",
-                    "is_featured": False
+                    "is_featured": False,
+                    "source_url": "https://example.com/yogamat"
+                },
+                {
+                    "name": "Coffee Subscription",
+                    "description": "Monthly delivery of premium coffee beans",
+                    "price": 19.99,
+                    "image_url": "https://placehold.co/600x400?text=Coffee+Subscription",
+                    "category": "Food & Beverages",
+                    "is_featured": True,
+                    "source_url": "https://example.com/coffee"
+                },
+                {
+                    "name": "Bluetooth Speaker",
+                    "description": "Portable waterproof bluetooth speaker with amazing sound",
+                    "price": 79.99,
+                    "image_url": "https://placehold.co/600x400?text=Bluetooth+Speaker",
+                    "category": "Electronics",
+                    "is_featured": False,
+                    "source_url": "https://example.com/speaker"
+                },
+                {
+                    "name": "Bestselling Novel",
+                    "description": "Latest bestselling fiction novel by a popular author",
+                    "price": 14.99,
+                    "image_url": "https://placehold.co/600x400?text=Bestselling+Novel",
+                    "category": "Books",
+                    "is_featured": False,
+                    "source_url": "https://example.com/book"
+                },
+                {
+                    "name": "Fitness Tracker",
+                    "description": "Advanced fitness tracker with heart rate monitor",
+                    "price": 89.99,
+                    "image_url": "https://placehold.co/600x400?text=Fitness+Tracker",
+                    "category": "Fitness",
+                    "is_featured": True,
+                    "source_url": "https://example.com/fitnesstracker"
                 }
             ]
             
@@ -88,6 +134,31 @@ def init_db():
             print("Sample gifts added successfully.")
         else:
             print("Gifts already exist in the database.")
+            
+        # Create a default wishlist for admin if none exists
+        if Wishlist.query.filter_by(user_id=admin_user.id).count() == 0:
+            default_wishlist = Wishlist(
+                name="My Wishlist",
+                description="A collection of things I'd like to receive",
+                is_public=True,
+                is_expert_list=False,
+                user_id=admin_user.id
+            )
+            db.session.add(default_wishlist)
+            db.session.commit()
+            
+            # Add some gifts to the wishlist
+            featured_gifts = Gift.query.filter_by(is_featured=True).limit(3).all()
+            for gift in featured_gifts:
+                item = WishlistItem(
+                    wishlist_id=default_wishlist.id,
+                    gift_id=gift.id,
+                    priority=2  # Medium priority
+                )
+                db.session.add(item)
+            
+            db.session.commit()
+            print("Default wishlist created for admin user.")
 
 if __name__ == "__main__":
     init_db()
