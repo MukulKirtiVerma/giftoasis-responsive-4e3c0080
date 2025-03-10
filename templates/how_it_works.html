@@ -1,0 +1,72 @@
+
+{% extends 'base.html' %}
+
+{% block title %}How It Works - GiftOasis{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-16">
+    <h1 class="text-3xl font-bold text-center mb-12">How GiftOasis Works</h1>
+    
+    <div class="max-w-4xl mx-auto">
+        <!-- Step 1 -->
+        <div class="flex flex-col md:flex-row items-center mb-16">
+            <div class="md:w-1/2 mb-6 md:mb-0 md:pr-8">
+                <div class="bg-purple-100 text-purple-600 rounded-full w-12 h-12 flex items-center justify-center mb-4">1</div>
+                <h2 class="text-2xl font-bold mb-4">Search for the Perfect Gift</h2>
+                <p class="text-gray-600 mb-4">Use our intuitive search tools to find gifts based on interests, occasion, age, and budget. We've curated thousands of unique gift ideas so you can find something special for everyone.</p>
+                <ul class="list-disc list-inside text-gray-600 space-y-2">
+                    <li>Filter by price range</li>
+                    <li>Browse by category</li>
+                    <li>Search by recipient's interests</li>
+                    <li>Find occasion-specific gifts</li>
+                </ul>
+            </div>
+            <div class="md:w-1/2">
+                <img src="https://placehold.co/600x400" alt="Search" class="rounded-lg shadow-md">
+            </div>
+        </div>
+        
+        <!-- Step 2 -->
+        <div class="flex flex-col md:flex-row-reverse items-center mb-16">
+            <div class="md:w-1/2 mb-6 md:mb-0 md:pl-8">
+                <div class="bg-purple-100 text-purple-600 rounded-full w-12 h-12 flex items-center justify-center mb-4">2</div>
+                <h2 class="text-2xl font-bold mb-4">Personalize Your Selection</h2>
+                <p class="text-gray-600 mb-4">Add a personal touch to make your gift truly meaningful. Many items can be customized with names, dates, or messages that show how much thought you've put into your gift.</p>
+                <ul class="list-disc list-inside text-gray-600 space-y-2">
+                    <li>Add custom engravings</li>
+                    <li>Include personalized messages</li>
+                    <li>Choose color and style options</li>
+                    <li>Create custom gift bundles</li>
+                </ul>
+            </div>
+            <div class="md:w-1/2">
+                <img src="https://placehold.co/600x400" alt="Personalize" class="rounded-lg shadow-md">
+            </div>
+        </div>
+        
+        <!-- Step 3 -->
+        <div class="flex flex-col md:flex-row items-center">
+            <div class="md:w-1/2 mb-6 md:mb-0 md:pr-8">
+                <div class="bg-purple-100 text-purple-600 rounded-full w-12 h-12 flex items-center justify-center mb-4">3</div>
+                <h2 class="text-2xl font-bold mb-4">Delight Your Recipient</h2>
+                <p class="text-gray-600 mb-4">Watch their face light up when they receive your thoughtfully chosen gift. Our premium gift-wrapping service and reliable delivery ensure that your gift arrives on time and makes a memorable impression.</p>
+                <ul class="list-disc list-inside text-gray-600 space-y-2">
+                    <li>Premium gift wrapping options</li>
+                    <li>Scheduled delivery</li>
+                    <li>Gift receipts (no prices shown)</li>
+                    <li>Easy returns if needed</li>
+                </ul>
+            </div>
+            <div class="md:w-1/2">
+                <img src="https://placehold.co/600x400" alt="Delight" class="rounded-lg shadow-md">
+            </div>
+        </div>
+    </div>
+    
+    <div class="mt-16 bg-purple-50 rounded-lg p-8 max-w-3xl mx-auto text-center">
+        <h2 class="text-2xl font-bold mb-4">Ready to Find the Perfect Gift?</h2>
+        <p class="text-gray-600 mb-6">Join thousands of happy gift-givers who have found the perfect presents for their loved ones.</p>
+        <a href="{{ url_for('index') }}" class="inline-block bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-medium">Start Exploring Gifts</a>
+    </div>
+</div>
+{% endblock %}

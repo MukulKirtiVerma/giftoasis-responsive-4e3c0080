@@ -1,69 +1,86 @@
-# Welcome to your Lovable project
 
-## Project info
+# GiftOasis Flask Application
 
-**URL**: https://lovable.dev/projects/28300774-47c6-4104-9027-ca602dd56ecb
+A Flask web application for a gift recommendation website with user authentication and MySQL database integration.
 
-## How can I edit this code?
+## Setup Instructions
 
-There are several ways of editing your application.
+### 1. Set up a virtual environment
 
-**Use Lovable**
+```bash
+# Create a virtual environment
+python -m venv venv
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/28300774-47c6-4104-9027-ca602dd56ecb) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+# Activate the virtual environment
+# On Windows
+venv\Scripts\activate
+# On macOS and Linux
+source venv/bin/activate
 ```
 
-**Edit a file directly in GitHub**
+### 2. Install dependencies
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+```bash
+pip install -r requirements.txt
+```
 
-**Use GitHub Codespaces**
+### 3. Configure environment variables
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+Create a `.env` file in the project root with the following contents (replacing placeholders with your actual values):
 
-## What technologies are used for this project?
+```
+# Flask configuration
+SECRET_KEY=your-secret-key-here
+FLASK_APP=app.py
+FLASK_ENV=development
 
-This project is built with .
+# Database configuration
+DB_USER=root
+DB_PASSWORD=password
+DB_HOST=localhost
+DB_PORT=3306
+DB_NAME=giftoasis
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+# Google OAuth configuration
+GOOGLE_CLIENT_ID=your-google-client-id
+GOOGLE_CLIENT_SECRET=your-google-client-secret
+```
 
-## How can I deploy this project?
+### 4. Set up MySQL database
 
-Simply open [Lovable](https://lovable.dev/projects/28300774-47c6-4104-9027-ca602dd56ecb) and click on Share -> Publish.
+Create a MySQL database named `giftoasis`:
 
-## I want to use a custom domain - is that possible?
+```sql
+CREATE DATABASE giftoasis;
+```
 
-We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)
+### 5. Run the application
+
+```bash
+flask run
+```
+
+## Google OAuth Setup
+
+1. Go to the [Google Cloud Console](https://console.cloud.google.com/)
+2. Create a new project
+3. Navigate to APIs & Services > OAuth consent screen
+4. Configure the OAuth consent screen
+5. Go to APIs & Services > Credentials
+6. Create OAuth client ID credentials
+7. Set the authorized redirect URI to `http://localhost:5000/google-auth`
+8. Copy the Client ID and Client Secret to your `.env` file
+
+## Default Admin User
+
+The application comes with a default user:
+- Email: rahulsingh60verma@gmail.com
+- Password: rahul@123A
+
+## Features
+
+- User authentication (email/password and Google OAuth)
+- Password-protected pages
+- Responsive design
+- Gift browsing and filtering
+- Categories and featured gifts

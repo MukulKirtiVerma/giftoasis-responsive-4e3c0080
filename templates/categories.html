@@ -1,0 +1,38 @@
+
+{% extends 'base.html' %}
+
+{% block title %}Categories - GiftOasis{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-16">
+    <h1 class="text-3xl font-bold text-center mb-12">Gift Categories</h1>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {% for category in [
+            {"name": "Birthday", "icon": "fas fa-gift", "color": "text-pink-500", "description": "Find the perfect birthday gift for friends, family, and colleagues."},
+            {"name": "Anniversary", "icon": "fas fa-heart", "color": "text-red-500", "description": "Celebrate love and commitment with meaningful anniversary gifts."},
+            {"name": "Wedding", "icon": "fas fa-ring", "color": "text-purple-500", "description": "Memorable wedding gifts to celebrate the happy couple."},
+            {"name": "Entertainment", "icon": "fas fa-music", "color": "text-blue-500", "description": "Music, movies, and more for the entertainment enthusiast."},
+            {"name": "Gaming", "icon": "fas fa-gamepad", "color": "text-green-500", "description": "The latest and greatest gifts for gamers of all ages."},
+            {"name": "Education", "icon": "fas fa-book", "color": "text-orange-500", "description": "Thoughtful educational gifts that inspire learning."},
+            {"name": "Home & Living", "icon": "fas fa-home", "color": "text-yellow-500", "description": "Beautiful items to make any house feel like a home."},
+            {"name": "Tech Gadgets", "icon": "fas fa-laptop", "color": "text-indigo-500", "description": "Cutting-edge technology gifts for the tech lover."},
+            {"name": "Sports & Outdoors", "icon": "fas fa-volleyball-ball", "color": "text-green-600", "description": "Active gifts for sports enthusiasts and outdoor adventurers."}
+        ] %}
+        <div class="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow">
+            <div class="p-6">
+                <div class="flex items-center mb-4">
+                    <i class="{{ category.icon }} {{ category.color }} text-2xl mr-3"></i>
+                    <h3 class="text-xl font-bold">{{ category.name }}</h3>
+                </div>
+                <p class="text-gray-600 mb-4">{{ category.description }}</p>
+                <a href="#" class="text-purple-600 hover:text-purple-700 font-medium flex items-center">
+                    Explore {{ category.name }} Gifts
+                    <i class="fas fa-arrow-right ml-2"></i>
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
