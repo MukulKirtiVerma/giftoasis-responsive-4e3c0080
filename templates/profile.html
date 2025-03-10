@@ -1,0 +1,130 @@
+
+{% extends 'base.html' %}
+
+{% block title %}{{ user.name }}'s Profile - GiftOasis{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-4xl mx-auto">
+        <!-- Profile Header -->
+        <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6">
+            <div class="h-48 bg-purple-100 relative">
+                <div class="absolute -bottom-16 left-8">
+                    <div class="w-32 h-32 rounded-full bg-white p-1 shadow-md overflow-hidden">
+                        {% if user.profile_image %}
+                            <img src="{{ user.profile_image }}" alt="{{ user.name }}" class="w-full h-full object-cover rounded-full">
+                        {% else %}
+                            <div class="w-full h-full bg-purple-200 rounded-full flex items-center justify-center">
+                                <span class="text-3xl font-bold text-purple-600">{{ user.name[0] }}</span>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                {% if current_user.id == user.id %}
+                <div class="absolute top-4 right-4">
+                    <a href="{{ url_for('edit_profile') }}" class="bg-white text-purple-600 px-4 py-2 rounded-md shadow-sm hover:bg-purple-50">
+                        Edit Profile
+                    </a>
+                </div>
+                {% else %}
+                <div class="absolute top-4 right-4 flex space-x-2">
+                    {% if is_following %}
+                    <form action="{{ url_for('unfollow', user_id=user.id) }}" method="POST">
+                        <button type="submit" class="bg-gray-200 text-gray-800 px-4 py-2 rounded-md shadow-sm hover:bg-gray-300">
+                            Unfollow
+                        </button>
+                    </form>
+                    {% else %}
+                    <form action="{{ url_for('follow', user_id=user.id) }}" method="POST">
+                        <button type="submit" class="bg-purple-600 text-white px-4 py-2 rounded-md shadow-sm hover:bg-purple-700">
+                            Follow
+                        </button>
+                    </form>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+            
+            <div class="pt-20 px-8 pb-8">
+                <h1 class="text-2xl font-bold text-gray-900 mb-2">{{ user.name }}</h1>
+                {% if user.bio %}
+                    <p class="text-gray-600 mb-4">{{ user.bio }}</p>
+                {% endif %}
+                
+                <div class="flex items-center space-x-4 text-sm text-gray-500">
+                    {% if user.birthdate %}
+                        <div class="flex items-center">
+                            <span class="mr-1">🎂</span>
+                            <span>{{ user.birthdate.strftime('%B %d') }}</span>
+                        </div>
+                    {% endif %}
+                    <div class="flex items-center">
+                        <span class="mr-1">📅</span>
+                        <span>Joined {{ user.created_at.strftime('%B %Y') }}</span>
+                    </div>
+                </div>
+                
+                <div class="flex mt-6 space-x-6">
+                    <a href="{{ url_for('user_followers', user_id=user.id) }}" class="text-gray-700 hover:text-purple-600">
+                        <span class="font-bold">{{ followers|length }}</span> Followers
+                    </a>
+                    <a href="{{ url_for('user_following', user_id=user.id) }}" class="text-gray-700 hover:text-purple-600">
+                        <span class="font-bold">{{ following|length }}</span> Following
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Wishlists Section -->
+        <h2 class="text-2xl font-bold text-gray-900 mb-4">Wishlists</h2>
+        
+        {% if wishlists %}
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                {% for wishlist in wishlists %}
+                    <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+                        <div class="h-32 bg-purple-100 relative">
+                            {% if wishlist.header_image %}
+                                <img src="{{ wishlist.header_image }}" alt="{{ wishlist.name }}" class="w-full h-full object-cover">
+                            {% endif %}
+                            {% if wishlist.is_expert_list %}
+                                <div class="absolute top-2 right-2 px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded-full">
+                                    Expert List
+                                </div>
+                            {% endif %}
+                            {% if not wishlist.is_public %}
+                                <div class="absolute top-2 left-2 px-2 py-1 bg-gray-800 text-white text-xs rounded-full">
+                                    Private
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="p-4">
+                            <h3 class="text-lg font-semibold mb-2">{{ wishlist.name }}</h3>
+                            {% if wishlist.description %}
+                                <p class="text-gray-600 text-sm mb-4 line-clamp-2">{{ wishlist.description }}</p>
+                            {% endif %}
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm text-gray-500">{{ wishlist.items|length }} items</span>
+                                <a href="{{ url_for('wishlist_detail', wishlist_id=wishlist.id) }}" class="text-purple-600 hover:text-purple-700">
+                                    View
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="bg-white rounded-lg shadow-md p-8 text-center mb-8">
+                {% if current_user.id == user.id %}
+                    <p class="text-gray-600 mb-4">You don't have any wishlists yet.</p>
+                    <a href="{{ url_for('create_wishlist') }}" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded">
+                        Create a Wishlist
+                    </a>
+                {% else %}
+                    <p class="text-gray-600">{{ user.name }} doesn't have any public wishlists yet.</p>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,11 +1,15 @@
 
-from flask import Flask, render_template, redirect, url_for, flash, request, session, jsonify
+from flask import Flask, render_template, redirect, url_for, flash, request, session, jsonify, abort
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from dotenv import load_dotenv
 from authlib.integrations.flask_client import OAuth
 import os
-from models import db, User, Gift, Wishlist, WishlistItem
-from forms import LoginForm, SignupForm, WishlistForm
+from datetime import datetime
+from models import db, User, Gift, Wishlist, WishlistItem, WishlistBookmark, Friendship
+from forms import (
+    LoginForm, SignupForm, WishlistForm, ProfileForm, 
+    GiftForm, GiftFromURLForm, SearchForm
+)
 
 # Load environment variables
 load_dotenv()
@@ -148,7 +152,6 @@ def gift_detail(gift_id):
     return render_template('gift_detail.html', gift=gift, wishlists=user_wishlists)
 
 @app.route('/how-it-works')
-@login_required
 def how_it_works():
     return render_template('how_it_works.html')
 
@@ -156,8 +159,48 @@ def how_it_works():
 @app.route('/wishlists')
 @login_required
 def wishlists():
-    user_wishlists = Wishlist.query.filter_by(user_id=current_user.id).all()
-    return render_template('wishlists.html', wishlists=user_wishlists)
+    my_wishlists = Wishlist.query.filter_by(user_id=current_user.id).all()
+    
+    # Get bookmarked wishlists
+    bookmarked_ids = db.session.query(WishlistBookmark.wishlist_id).filter_by(user_id=current_user.id).all()
+    bookmarked_ids = [id[0] for id in bookmarked_ids]
+    bookmarked_wishlists = Wishlist.query.filter(Wishlist.id.in_(bookmarked_ids)).all()
+    
+    # Get reserved and purchased gifts
+    reserved_items = WishlistItem.query.filter_by(reserved_by=current_user.id, status='reserved').all()
+    purchased_items = WishlistItem.query.filter_by(reserved_by=current_user.id, status='purchased').all()
+    
+    # Get the gifts and wishlists for these items
+    reserved_gifts = []
+    purchased_gifts = []
+    
+    for item in reserved_items:
+        gift = Gift.query.get(item.gift_id)
+        wishlist = Wishlist.query.get(item.wishlist_id)
+        if gift and wishlist:
+            reserved_gifts.append({
+                'gift': gift, 
+                'wishlist': wishlist,
+                'item': item
+            })
+    
+    for item in purchased_items:
+        gift = Gift.query.get(item.gift_id)
+        wishlist = Wishlist.query.get(item.wishlist_id)
+        if gift and wishlist:
+            purchased_gifts.append({
+                'gift': gift, 
+                'wishlist': wishlist,
+                'item': item
+            })
+    
+    return render_template(
+        'wishlists.html', 
+        my_wishlists=my_wishlists, 
+        bookmarked_wishlists=bookmarked_wishlists,
+        reserved_gifts=reserved_gifts,
+        purchased_gifts=purchased_gifts
+    )
 
 @app.route('/wishlist/new', methods=['GET', 'POST'])
 @login_required
@@ -166,33 +209,208 @@ def create_wishlist():
     if form.validate_on_submit():
         wishlist = Wishlist(
             name=form.name.data,
+            description=form.description.data,
+            is_public=form.is_public.data,
+            is_expert_list=form.is_expert_list.data,
             user_id=current_user.id
         )
+        
+        # Handle header image upload here if implemented
+        
         db.session.add(wishlist)
         db.session.commit()
         flash('Wishlist created successfully!', 'success')
-        return redirect(url_for('wishlists'))
+        return redirect(url_for('wishlist_detail', wishlist_id=wishlist.id))
+    
     return render_template('create_wishlist.html', form=form)
 
 @app.route('/wishlist/<int:wishlist_id>')
 @login_required
 def wishlist_detail(wishlist_id):
     wishlist = Wishlist.query.get_or_404(wishlist_id)
-    if wishlist.user_id != current_user.id:
+    
+    # Check if private wishlist belongs to another user
+    if not wishlist.is_public and wishlist.user_id != current_user.id:
         flash('You do not have permission to view this wishlist', 'danger')
         return redirect(url_for('wishlists'))
     
+    # Get all wishlist items
     items = WishlistItem.query.filter_by(wishlist_id=wishlist_id).all()
-    gifts = [Gift.query.get(item.gift_id) for item in items]
-    return render_template('wishlist_detail.html', wishlist=wishlist, gifts=gifts)
+    
+    # Create a dictionary to map gift_id to item for easy lookup
+    gift_items = {}
+    gift_ids = [item.gift_id for item in items]
+    
+    for item in items:
+        gift_items[item.gift_id] = item
+    
+    # Get all gifts in the wishlist
+    gifts = Gift.query.filter(Gift.id.in_(gift_ids)).all()
+    
+    # Check if user has bookmarked this wishlist
+    is_bookmarked = WishlistBookmark.query.filter_by(
+        user_id=current_user.id, 
+        wishlist_id=wishlist_id
+    ).first() is not None
+    
+    return render_template(
+        'wishlist_detail.html', 
+        wishlist=wishlist, 
+        gifts=gifts, 
+        gift_items=gift_items,
+        is_bookmarked=is_bookmarked
+    )
+
+@app.route('/wishlist/<int:wishlist_id>/edit', methods=['GET', 'POST'])
+@login_required
+def edit_wishlist(wishlist_id):
+    wishlist = Wishlist.query.get_or_404(wishlist_id)
+    
+    # Check ownership
+    if wishlist.user_id != current_user.id:
+        flash('You do not have permission to edit this wishlist', 'danger')
+        return redirect(url_for('wishlists'))
+    
+    form = WishlistForm(obj=wishlist)
+    
+    if form.validate_on_submit():
+        wishlist.name = form.name.data
+        wishlist.description = form.description.data
+        wishlist.is_public = form.is_public.data
+        wishlist.is_expert_list = form.is_expert_list.data
+        
+        # Handle header image update here if implemented
+        
+        db.session.commit()
+        flash('Wishlist updated successfully!', 'success')
+        return redirect(url_for('wishlist_detail', wishlist_id=wishlist.id))
+    
+    return render_template('edit_wishlist.html', form=form, wishlist=wishlist)
+
+@app.route('/wishlist/<int:wishlist_id>/delete', methods=['POST'])
+@login_required
+def delete_wishlist(wishlist_id):
+    wishlist = Wishlist.query.get_or_404(wishlist_id)
+    
+    # Check ownership
+    if wishlist.user_id != current_user.id:
+        flash('You do not have permission to delete this wishlist', 'danger')
+        return redirect(url_for('wishlists'))
+    
+    # Delete all items in wishlist
+    WishlistItem.query.filter_by(wishlist_id=wishlist_id).delete()
+    
+    # Delete all bookmarks for this wishlist
+    WishlistBookmark.query.filter_by(wishlist_id=wishlist_id).delete()
+    
+    # Delete the wishlist
+    db.session.delete(wishlist)
+    db.session.commit()
+    
+    flash('Wishlist deleted successfully!', 'success')
+    return redirect(url_for('wishlists'))
+
+@app.route('/wishlist/<int:wishlist_id>/add-gift', methods=['GET', 'POST'])
+@login_required
+def add_gift(wishlist_id):
+    wishlist = Wishlist.query.get_or_404(wishlist_id)
+    
+    # Check ownership
+    if wishlist.user_id != current_user.id:
+        flash('You do not have permission to add gifts to this wishlist', 'danger')
+        return redirect(url_for('wishlists'))
+    
+    form = GiftForm()
+    url_form = GiftFromURLForm()
+    url_form.wishlist_id.data = wishlist_id
+    
+    from_url = request.args.get('from_url', 'false') == 'true'
+    
+    if form.validate_on_submit():
+        gift = Gift(
+            name=form.name.data,
+            description=form.description.data,
+            price=form.price.data,
+            image_url=form.image_url.data,
+            category=form.category.data,
+            source_url=form.source_url.data
+        )
+        
+        db.session.add(gift)
+        db.session.flush()  # Get the gift ID without committing
+        
+        # Add to wishlist
+        wishlist_item = WishlistItem(
+            wishlist_id=wishlist_id,
+            gift_id=gift.id
+        )
+        
+        db.session.add(wishlist_item)
+        db.session.commit()
+        
+        flash('Gift added to wishlist successfully!', 'success')
+        return redirect(url_for('wishlist_detail', wishlist_id=wishlist_id))
+    
+    return render_template(
+        'add_gift.html', 
+        form=form, 
+        url_form=url_form, 
+        wishlist=wishlist,
+        from_url=from_url
+    )
+
+@app.route('/wishlist/<int:wishlist_id>/add-gift-from-url', methods=['POST'])
+@login_required
+def add_gift_from_url(wishlist_id):
+    wishlist = Wishlist.query.get_or_404(wishlist_id)
+    
+    # Check ownership
+    if wishlist.user_id != current_user.id:
+        flash('You do not have permission to add gifts to this wishlist', 'danger')
+        return redirect(url_for('wishlists'))
+    
+    url_form = GiftFromURLForm()
+    
+    if url_form.validate_on_submit():
+        # In a real application, you would scrape the product information
+        # For now, create a placeholder gift
+        gift = Gift(
+            name="Gift from URL",
+            description="Product from " + url_form.url.data,
+            price=0.00,
+            category="Other",
+            source_url=url_form.url.data
+        )
+        
+        db.session.add(gift)
+        db.session.flush()
+        
+        # Add to wishlist
+        wishlist_item = WishlistItem(
+            wishlist_id=wishlist_id,
+            gift_id=gift.id
+        )
+        
+        db.session.add(wishlist_item)
+        db.session.commit()
+        
+        flash('Gift added from URL! You may want to edit its details.', 'success')
+        return redirect(url_for('wishlist_detail', wishlist_id=wishlist_id))
+    
+    return redirect(url_for('add_gift', wishlist_id=wishlist_id, from_url='true'))
 
 @app.route('/wishlist/<int:wishlist_id>/add/<int:gift_id>', methods=['POST'])
 @login_required
 def add_to_wishlist(wishlist_id, gift_id):
     wishlist = Wishlist.query.get_or_404(wishlist_id)
+    
+    # Check ownership
     if wishlist.user_id != current_user.id:
         flash('You do not have permission to modify this wishlist', 'danger')
         return redirect(url_for('wishlists'))
+    
+    # Check if gift exists
+    gift = Gift.query.get_or_404(gift_id)
     
     # Check if item already in wishlist
     existing_item = WishlistItem.query.filter_by(wishlist_id=wishlist_id, gift_id=gift_id).first()
@@ -210,10 +428,13 @@ def add_to_wishlist(wishlist_id, gift_id):
 @login_required
 def remove_from_wishlist(wishlist_id, gift_id):
     wishlist = Wishlist.query.get_or_404(wishlist_id)
+    
+    # Check ownership
     if wishlist.user_id != current_user.id:
         flash('You do not have permission to modify this wishlist', 'danger')
         return redirect(url_for('wishlists'))
     
+    # Find and remove the item
     item = WishlistItem.query.filter_by(wishlist_id=wishlist_id, gift_id=gift_id).first()
     if item:
         db.session.delete(item)
@@ -221,6 +442,227 @@ def remove_from_wishlist(wishlist_id, gift_id):
         flash('Item removed from wishlist successfully!', 'success')
     
     return redirect(url_for('wishlist_detail', wishlist_id=wishlist_id))
+
+@app.route('/wishlist/<int:wishlist_id>/bookmark', methods=['POST'])
+@login_required
+def add_bookmark(wishlist_id):
+    wishlist = Wishlist.query.get_or_404(wishlist_id)
+    
+    # Can't bookmark your own wishlist
+    if wishlist.user_id == current_user.id:
+        flash('You cannot bookmark your own wishlist', 'info')
+        return redirect(url_for('wishlist_detail', wishlist_id=wishlist_id))
+    
+    # Check if already bookmarked
+    existing = WishlistBookmark.query.filter_by(
+        user_id=current_user.id, 
+        wishlist_id=wishlist_id
+    ).first()
+    
+    if not existing:
+        bookmark = WishlistBookmark(
+            user_id=current_user.id,
+            wishlist_id=wishlist_id
+        )
+        db.session.add(bookmark)
+        db.session.commit()
+        flash('Wishlist bookmarked successfully!', 'success')
+    
+    return redirect(url_for('wishlist_detail', wishlist_id=wishlist_id))
+
+@app.route('/wishlist/<int:wishlist_id>/remove-bookmark', methods=['POST'])
+@login_required
+def remove_bookmark(wishlist_id):
+    bookmark = WishlistBookmark.query.filter_by(
+        user_id=current_user.id, 
+        wishlist_id=wishlist_id
+    ).first()
+    
+    if bookmark:
+        db.session.delete(bookmark)
+        db.session.commit()
+        flash('Bookmark removed successfully!', 'success')
+    
+    return redirect(url_for('wishlist_detail', wishlist_id=wishlist_id))
+
+@app.route('/wishlist/<int:wishlist_id>/reserve/<int:gift_id>', methods=['POST'])
+@login_required
+def reserve_gift(wishlist_id, gift_id):
+    wishlist = Wishlist.query.get_or_404(wishlist_id)
+    
+    # Can't reserve from your own wishlist
+    if wishlist.user_id == current_user.id:
+        flash('You cannot reserve gifts from your own wishlist', 'info')
+        return redirect(url_for('wishlist_detail', wishlist_id=wishlist_id))
+    
+    # Find the item
+    item = WishlistItem.query.filter_by(wishlist_id=wishlist_id, gift_id=gift_id).first_or_404()
+    
+    # Only reserve if available
+    if item.status == 'available':
+        item.status = 'reserved'
+        item.reserved_by = current_user.id
+        db.session.commit()
+        flash('Gift reserved successfully!', 'success')
+    else:
+        flash('This gift is no longer available', 'info')
+    
+    return redirect(url_for('wishlist_detail', wishlist_id=wishlist_id))
+
+@app.route('/wishlist/<int:wishlist_id>/unreserve/<int:gift_id>', methods=['POST'])
+@login_required
+def unreserve_gift(wishlist_id, gift_id):
+    # Find the item
+    item = WishlistItem.query.filter_by(wishlist_id=wishlist_id, gift_id=gift_id).first_or_404()
+    
+    # Only unreserve if reserved by current user
+    if item.status == 'reserved' and item.reserved_by == current_user.id:
+        item.status = 'available'
+        item.reserved_by = None
+        db.session.commit()
+        flash('Reservation cancelled successfully!', 'success')
+    
+    return redirect(url_for('wishlist_detail', wishlist_id=wishlist_id))
+
+@app.route('/wishlist/<int:wishlist_id>/mark-purchased/<int:gift_id>', methods=['POST'])
+@login_required
+def mark_purchased(wishlist_id, gift_id):
+    # Find the item
+    item = WishlistItem.query.filter_by(wishlist_id=wishlist_id, gift_id=gift_id).first_or_404()
+    
+    # Only mark as purchased if reserved by current user
+    if item.status == 'reserved' and item.reserved_by == current_user.id:
+        item.status = 'purchased'
+        db.session.commit()
+        flash('Gift marked as purchased!', 'success')
+    
+    return redirect(url_for('wishlist_detail', wishlist_id=wishlist_id))
+
+# User and profile routes
+@app.route('/user/<int:user_id>')
+@login_required
+def user_profile(user_id):
+    user = User.query.get_or_404(user_id)
+    
+    # Get public wishlists for this user
+    if user.id == current_user.id:
+        wishlists = Wishlist.query.filter_by(user_id=user.id).all()
+    else:
+        wishlists = Wishlist.query.filter_by(user_id=user.id, is_public=True).all()
+    
+    followers = user.followers.all()
+    following = user.following.all()
+    
+    is_following = current_user.is_following(user) if user.id != current_user.id else None
+    
+    return render_template(
+        'profile.html', 
+        user=user, 
+        wishlists=wishlists, 
+        followers=followers,
+        following=following,
+        is_following=is_following
+    )
+
+@app.route('/profile/edit', methods=['GET', 'POST'])
+@login_required
+def edit_profile():
+    form = ProfileForm(obj=current_user)
+    
+    if form.validate_on_submit():
+        current_user.name = form.name.data
+        current_user.bio = form.bio.data
+        current_user.birthdate = form.birthdate.data
+        
+        # Handle profile image upload here if implemented
+        
+        db.session.commit()
+        flash('Profile updated successfully!', 'success')
+        return redirect(url_for('user_profile', user_id=current_user.id))
+    
+    return render_template('edit_profile.html', form=form)
+
+@app.route('/user/<int:user_id>/followers')
+@login_required
+def user_followers(user_id):
+    user = User.query.get_or_404(user_id)
+    followers = [friendship.follower for friendship in user.followers.all()]
+    
+    return render_template(
+        'followers.html', 
+        user=user, 
+        users=followers, 
+        title='Followers'
+    )
+
+@app.route('/user/<int:user_id>/following')
+@login_required
+def user_following(user_id):
+    user = User.query.get_or_404(user_id)
+    following = [friendship.followed for friendship in user.following.all()]
+    
+    return render_template(
+        'followers.html', 
+        user=user, 
+        users=following, 
+        title='Following'
+    )
+
+@app.route('/follow/<int:user_id>', methods=['POST'])
+@login_required
+def follow(user_id):
+    user = User.query.get_or_404(user_id)
+    
+    if user.id == current_user.id:
+        flash('You cannot follow yourself!', 'info')
+    else:
+        current_user.follow(user)
+        db.session.commit()
+        flash(f'You are now following {user.name}!', 'success')
+    
+    return redirect(url_for('user_profile', user_id=user_id))
+
+@app.route('/unfollow/<int:user_id>', methods=['POST'])
+@login_required
+def unfollow(user_id):
+    user = User.query.get_or_404(user_id)
+    
+    if user.id == current_user.id:
+        flash('You cannot unfollow yourself!', 'info')
+    else:
+        current_user.unfollow(user)
+        db.session.commit()
+        flash(f'You have unfollowed {user.name}.', 'success')
+    
+    return redirect(url_for('user_profile', user_id=user_id))
+
+@app.route('/find-friends')
+@login_required
+def find_friends():
+    search_type = request.args.get('search_type', 'name')
+    query = request.args.get('query', '')
+    users = []
+    
+    if query:
+        if search_type == 'name':
+            users = User.query.filter(User.name.like(f'%{query}%')).all()
+        elif search_type == 'email':
+            users = User.query.filter(User.email.like(f'%{query}%')).all()
+        # Add support for organization search when implemented
+    
+    # Get suggested users (users not currently followed)
+    followed_ids = [f.followed_id for f in current_user.following.all()]
+    followed_ids.append(current_user.id)  # Don't suggest self
+    
+    suggested_users = User.query.filter(~User.id.in_(followed_ids)).limit(6).all()
+    
+    return render_template(
+        'find_friends.html', 
+        users=users, 
+        suggested_users=suggested_users,
+        search_type=search_type,
+        query=query
+    )
 
 # Create tables within application context
 with app.app_context():
