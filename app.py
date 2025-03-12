@@ -1,11 +1,12 @@
-
 from flask import Flask, render_template, redirect, url_for, flash, request, session, jsonify, abort
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from dotenv import load_dotenv
 from authlib.integrations.flask_client import OAuth
 import os
 from datetime import datetime
-from models import db, User, Gift, Wishlist, WishlistItem, WishlistBookmark, Friendship
+import requests
+from werkzeug.utils import secure_filename
+from models import db, User, Gift, Wishlist, WishlistItem, WishlistBookmark, Friendship, Notification
 from forms import (
     LoginForm, SignupForm, WishlistForm, ProfileForm, 
     GiftForm, GiftFromURLForm, SearchForm
@@ -207,15 +208,33 @@ def wishlists():
 def create_wishlist():
     form = WishlistForm()
     if form.validate_on_submit():
+        # Process form data
+        is_expert_list = 'list_type' in request.form and request.form['list_type'] == 'expert_list'
+        is_public = 'visibility' in request.form and request.form['visibility'] == 'public'
+        
         wishlist = Wishlist(
             name=form.name.data,
             description=form.description.data,
-            is_public=form.is_public.data,
-            is_expert_list=form.is_expert_list.data,
-            user_id=current_user.id
+            is_public=is_public,
+            is_expert_list=is_expert_list,
+            user_id=current_user.id,
+            show_confirmed_gifts=form.show_confirmed_gifts.data
         )
         
-        # Handle header image upload here if implemented
+        # Handle header image upload
+        if form.header_image.data:
+            filename = secure_filename(form.header_image.data.filename)
+            if filename:
+                # Create directory if it doesn't exist
+                upload_dir = os.path.join('static', 'uploads', 'headers')
+                os.makedirs(upload_dir, exist_ok=True)
+                
+                # Save the file
+                file_path = os.path.join(upload_dir, filename)
+                form.header_image.data.save(file_path)
+                
+                # Store the relative path in the database
+                wishlist.header_image = os.path.join('/static/uploads/headers', filename)
         
         db.session.add(wishlist)
         db.session.commit()
@@ -276,10 +295,28 @@ def edit_wishlist(wishlist_id):
     if form.validate_on_submit():
         wishlist.name = form.name.data
         wishlist.description = form.description.data
-        wishlist.is_public = form.is_public.data
-        wishlist.is_expert_list = form.is_expert_list.data
         
-        # Handle header image update here if implemented
+        is_expert_list = 'list_type' in request.form and request.form['list_type'] == 'expert_list'
+        is_public = 'visibility' in request.form and request.form['visibility'] == 'public'
+        
+        wishlist.is_public = is_public
+        wishlist.is_expert_list = is_expert_list
+        wishlist.show_confirmed_gifts = form.show_confirmed_gifts.data
+        
+        # Handle header image update
+        if form.header_image.data:
+            filename = secure_filename(form.header_image.data.filename)
+            if filename:
+                # Create directory if it doesn't exist
+                upload_dir = os.path.join('static', 'uploads', 'headers')
+                os.makedirs(upload_dir, exist_ok=True)
+                
+                # Save the file
+                file_path = os.path.join(upload_dir, filename)
+                form.header_image.data.save(file_path)
+                
+                # Store the relative path in the database
+                wishlist.header_image = os.path.join('/static/uploads/headers', filename)
         
         db.session.commit()
         flash('Wishlist updated successfully!', 'success')
@@ -327,11 +364,28 @@ def add_gift(wishlist_id):
     from_url = request.args.get('from_url', 'false') == 'true'
     
     if form.validate_on_submit():
+        # Handle image upload if present
+        image_url = form.image_url.data
+        if 'gift_image' in request.files and request.files['gift_image'].filename:
+            image_file = request.files['gift_image']
+            if image_file:
+                # Create directory if it doesn't exist
+                upload_dir = os.path.join('static', 'uploads', 'gifts')
+                os.makedirs(upload_dir, exist_ok=True)
+                
+                # Save the file
+                filename = secure_filename(image_file.filename)
+                file_path = os.path.join(upload_dir, filename)
+                image_file.save(file_path)
+                
+                # Store the relative path
+                image_url = os.path.join('/static/uploads/gifts', filename)
+        
         gift = Gift(
             name=form.name.data,
             description=form.description.data,
             price=form.price.data,
-            image_url=form.image_url.data,
+            image_url=image_url,
             category=form.category.data,
             source_url=form.source_url.data
         )
@@ -342,7 +396,9 @@ def add_gift(wishlist_id):
         # Add to wishlist
         wishlist_item = WishlistItem(
             wishlist_id=wishlist_id,
-            gift_id=gift.id
+            gift_id=gift.id,
+            priority=form.priority.data,
+            note=form.note.data
         )
         
         db.session.add(wishlist_item)
@@ -372,14 +428,73 @@ def add_gift_from_url(wishlist_id):
     url_form = GiftFromURLForm()
     
     if url_form.validate_on_submit():
-        # In a real application, you would scrape the product information
-        # For now, create a placeholder gift
+        url = url_form.url.data
+        priority = url_form.priority.data
+        note = url_form.note.data
+        
+        # Basic information for the gift
+        gift_info = {
+            'name': 'Gift from URL',
+            'description': '',
+            'price': 0.00,
+            'image_url': None,
+            'category': 'Other'
+        }
+        
+        try:
+            # Get website content
+            headers = {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+            }
+            response = requests.get(url, headers=headers, timeout=10)
+            
+            if response.status_code == 200:
+                # This is a very basic implementation
+                # In a real application, you would use BeautifulSoup or another library
+                # to parse the HTML and extract specific information
+                
+                # Extract title from HTML
+                import re
+                title_match = re.search('<title>(.*?)</title>', response.text, re.IGNORECASE)
+                if title_match:
+                    gift_info['name'] = title_match.group(1).strip()
+                
+                # Look for a price
+                price_patterns = [
+                    r'\$\s*(\d+(?:\.\d{2})?)',  # $XX.XX format
+                    r'price["\']?\s*:\s*["\']?(\d+(?:\.\d{2})?)',  # price: XX.XX format
+                ]
+                
+                for pattern in price_patterns:
+                    price_match = re.search(pattern, response.text, re.IGNORECASE)
+                    if price_match:
+                        try:
+                            gift_info['price'] = float(price_match.group(1))
+                            break
+                        except (ValueError, IndexError):
+                            pass
+                
+                # Look for an image
+                img_match = re.search(r'<meta\s+property=["\']og:image["\']\s+content=["\']([^"\']+)["\']', response.text)
+                if img_match:
+                    gift_info['image_url'] = img_match.group(1)
+                
+                # Look for a description
+                desc_match = re.search(r'<meta\s+name=["\']description["\']\s+content=["\']([^"\']+)["\']', response.text)
+                if desc_match:
+                    gift_info['description'] = desc_match.group(1)
+        
+        except Exception as e:
+            flash(f'Error fetching information from URL: {str(e)}', 'warning')
+        
+        # Create the gift with the extracted or default information
         gift = Gift(
-            name="Gift from URL",
-            description="Product from " + url_form.url.data,
-            price=0.00,
-            category="Other",
-            source_url=url_form.url.data
+            name=gift_info['name'],
+            description=gift_info['description'],
+            price=gift_info['price'],
+            image_url=gift_info['image_url'],
+            category=gift_info['category'],
+            source_url=url
         )
         
         db.session.add(gift)
@@ -388,7 +503,9 @@ def add_gift_from_url(wishlist_id):
         # Add to wishlist
         wishlist_item = WishlistItem(
             wishlist_id=wishlist_id,
-            gift_id=gift.id
+            gift_id=gift.id,
+            priority=priority,
+            note=note
         )
         
         db.session.add(wishlist_item)
@@ -397,6 +514,7 @@ def add_gift_from_url(wishlist_id):
         flash('Gift added from URL! You may want to edit its details.', 'success')
         return redirect(url_for('wishlist_detail', wishlist_id=wishlist_id))
     
+    flash('Invalid form submission', 'danger')
     return redirect(url_for('add_gift', wishlist_id=wishlist_id, from_url='true'))
 
 @app.route('/wishlist/<int:wishlist_id>/add/<int:gift_id>', methods=['POST'])
@@ -664,10 +782,5 @@ def find_friends():
         query=query
     )
 
-# Create tables within application context
-with app.app_context():
-    db.create_all()
-
-# Run the app
-if __name__ == '__main__':
-    app.run(debug=True)
+# Add routes for spoiler alert functionality
+@app.route('/wishlist/<int:
