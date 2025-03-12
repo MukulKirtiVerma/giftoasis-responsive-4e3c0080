@@ -4,16 +4,19 @@
 {% block title %}Create Wishlist - GiftOasis{% endblock %}
 
 {% block content %}
-<div class="container mx-auto px-4 py-16">
-    <div class="max-w-md mx-auto bg-white rounded-lg shadow-md p-8">
-        <h2 class="text-2xl font-bold text-center mb-6">Create a New Wishlist</h2>
+<div class="container mx-auto px-4 py-10">
+    <div class="max-w-2xl mx-auto bg-white rounded-xl shadow-md overflow-hidden">
+        <div class="bg-purple-600 p-4 text-white">
+            <h2 class="text-2xl font-bold">Create a New Wishlist</h2>
+            <p class="text-purple-100">Share what you want with friends and family</p>
+        </div>
         
-        <form method="POST" action="{{ url_for('create_wishlist') }}" enctype="multipart/form-data">
+        <form method="POST" action="{{ url_for('create_wishlist') }}" enctype="multipart/form-data" class="p-6">
             {{ form.hidden_tag() }}
             
             <div class="mb-6">
-                {{ form.name.label(class="block text-gray-700 mb-2") }}
-                {{ form.name(class="w-full border border-gray-300 rounded px-4 py-2", placeholder="Wishlist Name") }}
+                {{ form.name.label(class="block text-gray-700 font-medium mb-2") }}
+                {{ form.name(class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500", placeholder="e.g., Birthday Wishlist, Christmas List") }}
                 {% if form.name.errors %}
                     <div class="text-red-500 text-sm mt-1">
                         {% for error in form.name.errors %}
@@ -21,11 +24,12 @@
                         {% endfor %}
                     </div>
                 {% endif %}
+                <p class="text-sm text-gray-500 mt-1">Give your wishlist a name that describes the occasion or theme</p>
             </div>
 
             <div class="mb-6">
-                {{ form.description.label(class="block text-gray-700 mb-2") }}
-                {{ form.description(class="w-full border border-gray-300 rounded px-4 py-2 h-24", placeholder="Describe your wishlist...") }}
+                {{ form.description.label(class="block text-gray-700 font-medium mb-2") }}
+                {{ form.description(class="w-full border border-gray-300 rounded-lg px-4 py-2 h-24 focus:outline-none focus:ring-2 focus:ring-purple-500", placeholder="Share details about your wishlist...") }}
                 {% if form.description.errors %}
                     <div class="text-red-500 text-sm mt-1">
                         {% for error in form.description.errors %}
@@ -33,75 +37,151 @@
                         {% endfor %}
                     </div>
                 {% endif %}
+                <p class="text-sm text-gray-500 mt-1">Add a description to help others understand your wishlist</p>
             </div>
 
             <div class="mb-6">
-                <label class="block text-gray-700 mb-2">List Type</label>
-                <div class="mb-2">
-                    <select name="list_type" class="w-full border border-gray-300 rounded px-4 py-2">
-                        <option value="wish_list">Wish List</option>
-                        <option value="expert_list">Expert List</option>
-                    </select>
+                <label class="block text-gray-700 font-medium mb-2">List Type</label>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="border rounded-lg p-4 cursor-pointer hover:border-purple-500" onclick="selectListType('wish_list', this)">
+                        <div class="flex items-center mb-2">
+                            <input type="radio" name="list_type" value="wish_list" id="wish_list" checked class="mr-2" />
+                            <span class="font-medium">Wish List</span>
+                        </div>
+                        <p class="text-sm text-gray-600">A personal collection of gifts you'd like to receive</p>
+                    </div>
+                    <div class="border rounded-lg p-4 cursor-pointer hover:border-purple-500" onclick="selectListType('expert_list', this)">
+                        <div class="flex items-center mb-2">
+                            <input type="radio" name="list_type" value="expert_list" id="expert_list" class="mr-2" />
+                            <span class="font-medium">Expert List</span>
+                        </div>
+                        <p class="text-sm text-gray-600">A curated collection of recommendations for others</p>
+                    </div>
                 </div>
             </div>
             
             <div class="mb-6">
-                <label class="block text-gray-700 mb-2">Who Can See this List?</label>
-                <div class="mb-2">
-                    <div class="flex items-center mb-2">
-                        <input type="radio" name="visibility" value="public" id="public" checked class="mr-2" />
-                        <label for="public" class="flex items-center">
+                <label class="block text-gray-700 font-medium mb-2">Privacy Settings</label>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="border rounded-lg p-4 cursor-pointer hover:border-purple-500" onclick="selectPrivacy('public', this)">
+                        <div class="flex items-center mb-2">
+                            <input type="radio" name="visibility" value="public" id="public" checked class="mr-2" />
                             <span class="bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs mr-2">
                                 <i class="fas fa-globe"></i> Public
                             </span>
-                            <span class="text-sm text-gray-600">Anyone online</span>
-                        </label>
+                        </div>
+                        <p class="text-sm text-gray-600">Anyone can find and view this wishlist</p>
                     </div>
-                    <div class="flex items-center">
-                        <input type="radio" name="visibility" value="private_link" id="private_link" class="mr-2" />
-                        <label for="private_link" class="flex items-center">
+                    <div class="border rounded-lg p-4 cursor-pointer hover:border-purple-500" onclick="selectPrivacy('private_link', this)">
+                        <div class="flex items-center mb-2">
+                            <input type="radio" name="visibility" value="private_link" id="private_link" class="mr-2" />
                             <span class="bg-red-100 text-red-700 px-2 py-1 rounded-full text-xs mr-2">
                                 <i class="fas fa-lock"></i> Private Link
                             </span>
-                            <span class="text-sm text-gray-600">Only those with a link to this list</span>
-                        </label>
+                        </div>
+                        <p class="text-sm text-gray-600">Only people with the link can view this wishlist</p>
                     </div>
                 </div>
                 <div class="text-sm text-gray-500 mt-2">
-                    <a href="#" class="text-blue-500 hover:underline">Learn more about list privacy settings</a>
+                    <a href="#" class="text-purple-600 hover:underline">Learn more about list privacy settings</a>
                 </div>
             </div>
 
-            <div class="mb-6">
-                {{ form.show_confirmed_gifts.label(class="flex items-center text-gray-700") }}
-                <div class="flex items-center mt-2">
+            <div class="mb-6 bg-gray-50 p-4 rounded-lg">
+                <div class="flex items-center">
                     {{ form.show_confirmed_gifts(class="mr-2") }}
-                    <span class="text-sm text-gray-600">Show gifts that have been purchased for me</span>
+                    {{ form.show_confirmed_gifts.label(class="text-gray-700") }}
+                </div>
+                <p class="text-sm text-gray-500 mt-1 ml-6">Enable this to see gifts that friends and family have already reserved or purchased for you</p>
+            </div>
+            
+            <div class="mb-6">
+                <label class="block text-gray-700 font-medium mb-2">
+                    {{ form.header_image.label }}
+                </label>
+                <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                    <div class="mb-3">
+                        <i class="fas fa-image text-4xl text-gray-400"></i>
+                    </div>
+                    <p class="text-gray-600 mb-2">Drag and drop an image, or click to browse</p>
+                    <p class="text-sm text-gray-500">Recommended size: 1200 × 300px</p>
+                    <div class="mt-4">
+                        {{ form.header_image(class="w-full", onchange="previewImage(event)") }}
+                    </div>
+                    <div id="image-preview" class="mt-4 hidden">
+                        <img id="preview" src="" alt="Preview" class="max-h-32 mx-auto">
+                    </div>
                 </div>
             </div>
             
-            <div class="mb-6">
-                {{ form.header_image.label(class="block text-gray-700 mb-2") }}
-                {{ form.header_image(class="w-full border border-gray-300 rounded px-4 py-2") }}
-                {% if form.header_image.errors %}
-                    <div class="text-red-500 text-sm mt-1">
-                        {% for error in form.header_image.errors %}
-                            <p>{{ error }}</p>
-                        {% endfor %}
-                    </div>
-                {% endif %}
-                <p class="text-sm text-gray-500 mt-1">Optional: Add a header image for your wishlist</p>
-            </div>
-            
-            <div class="flex justify-between">
-                <a href="{{ url_for('wishlists') }}" class="bg-gray-200 text-gray-800 px-4 py-2 rounded hover:bg-gray-300">
+            <div class="flex justify-between mt-8">
+                <a href="{{ url_for('wishlists') }}" class="bg-gray-200 text-gray-800 px-6 py-2 rounded-lg hover:bg-gray-300 font-medium">
                     Cancel
                 </a>
-                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded">
+                <button type="submit" class="bg-purple-600 hover:bg-purple-700 text-white px-8 py-2 rounded-lg font-medium">
                     Create Wishlist
                 </button>
             </div>
         </form>
     </div>
 </div>
+
+<script>
+    function selectListType(type, element) {
+        // Remove highlight from all options
+        document.querySelectorAll('input[name="list_type"]').forEach(el => {
+            el.parentElement.parentElement.classList.remove('border-purple-500', 'bg-purple-50');
+        });
+        
+        // Add highlight to selected option
+        element.classList.add('border-purple-500', 'bg-purple-50');
+        
+        // Select the radio button
+        document.getElementById(type).checked = true;
+    }
+    
+    function selectPrivacy(type, element) {
+        // Remove highlight from all options
+        document.querySelectorAll('input[name="visibility"]').forEach(el => {
+            el.parentElement.parentElement.classList.remove('border-purple-500', 'bg-purple-50');
+        });
+        
+        // Add highlight to selected option
+        element.classList.add('border-purple-500', 'bg-purple-50');
+        
+        // Select the radio button
+        document.getElementById(type).checked = true;
+    }
+    
+    function previewImage(event) {
+        const preview = document.getElementById('preview');
+        const previewContainer = document.getElementById('image-preview');
+        
+        if (event.target.files && event.target.files[0]) {
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                preview.src = e.target.result;
+                previewContainer.classList.remove('hidden');
+            }
+            
+            reader.readAsDataURL(event.target.files[0]);
+        }
+    }
+    
+    // Initialize the selected options on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        if (document.getElementById('wish_list').checked) {
+            selectListType('wish_list', document.getElementById('wish_list').parentElement.parentElement);
+        } else {
+            selectListType('expert_list', document.getElementById('expert_list').parentElement.parentElement);
+        }
+        
+        if (document.getElementById('public').checked) {
+            selectPrivacy('public', document.getElementById('public').parentElement.parentElement);
+        } else {
+            selectPrivacy('private_link', document.getElementById('private_link').parentElement.parentElement);
+        }
+    });
+</script>
 {% endblock %}

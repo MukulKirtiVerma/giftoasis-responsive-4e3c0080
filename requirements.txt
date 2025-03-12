@@ -12,3 +12,4 @@ Werkzeug==2.3.7
 itsdangerous==2.1.2
 gunicorn==21.2.0
 sqlalchemy>=1.4.0,<1.5.0
+Pillow==10.0.0
