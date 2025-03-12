@@ -8,35 +8,122 @@
     <div class="max-w-7xl mx-auto">
         <div class="flex justify-between items-center mb-8">
             <h1 class="text-3xl font-bold text-gray-800">My Wishlists</h1>
-            <a href="{{ url_for('create_wishlist') }}" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded">
-                Create New Wishlist
-            </a>
+        </div>
+
+        <div class="mb-8">
+            <div class="bg-gradient-to-r from-blue-100 to-blue-50 rounded-lg shadow-md overflow-hidden">
+                <div class="p-6 relative">
+                    <div class="absolute top-4 right-4">
+                        <a href="{{ url_for('create_wishlist') }}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded flex items-center">
+                            <i class="fas fa-plus mr-2"></i> New Wish List
+                        </a>
+                    </div>
+                    
+                    <div class="flex items-center mb-4">
+                        <div class="mr-4 bg-blue-100 p-3 rounded-full text-blue-600">
+                            <i class="fas fa-heart text-2xl"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-xl font-semibold text-gray-800">My Wish Lists</h2>
+                            <p class="text-gray-600">The things I want for myself</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mb-12">
+            <div class="bg-gradient-to-r from-purple-100 to-purple-50 rounded-lg shadow-md overflow-hidden">
+                <div class="p-6 relative">
+                    <div class="absolute top-4 right-4">
+                        <a href="{{ url_for('create_wishlist') }}?type=expert" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded flex items-center">
+                            <i class="fas fa-plus mr-2"></i> New Expert List
+                        </a>
+                    </div>
+                    
+                    <div class="flex items-center mb-4">
+                        <div class="mr-4 bg-purple-100 p-3 rounded-full text-purple-600">
+                            <i class="fas fa-star text-2xl"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-xl font-semibold text-gray-800">My Expert Lists</h2>
+                            <p class="text-gray-600">Build lists of your favorite recommendations</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
         {% if wishlists %}
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {% for wishlist in wishlists %}
-                    <div class="bg-white rounded-lg shadow-md overflow-hidden">
-                        <div class="p-6">
+                    <div class="bg-white rounded-lg shadow-md overflow-hidden transition-transform duration-200 hover:shadow-lg hover:-translate-y-1">
+                        <div class="h-32 bg-blue-100 relative">
+                            {% if wishlist.header_image %}
+                                <img src="{{ wishlist.header_image }}" alt="{{ wishlist.name }}" class="w-full h-full object-cover">
+                            {% endif %}
+                            
+                            {% if wishlist.is_expert_list %}
+                                <div class="absolute top-4 left-4 px-3 py-1 bg-purple-100 text-purple-700 text-sm rounded-full">
+                                    <i class="fas fa-star mr-1"></i> Expert List
+                                </div>
+                            {% endif %}
+                            
+                            {% if not wishlist.is_public %}
+                                <div class="absolute top-4 {% if wishlist.is_expert_list %}left-32{% else %}left-4{% endif %} px-3 py-1 bg-red-100 text-red-700 text-sm rounded-full">
+                                    <i class="fas fa-lock mr-1"></i> Private
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="p-4">
                             <h2 class="text-xl font-semibold mb-2">{{ wishlist.name }}</h2>
-                            <p class="text-gray-600 mb-4">Created on {{ wishlist.created_at.strftime('%B %d, %Y') }}</p>
-                            <p class="text-gray-600 mb-4">{{ wishlist.items|length }} items</p>
-                            <a href="{{ url_for('wishlist_detail', wishlist_id=wishlist.id) }}" class="text-purple-600 hover:text-purple-700 font-medium">
-                                View Wishlist →
-                            </a>
+                            {% if wishlist.description %}
+                                <p class="text-gray-600 mb-4 line-clamp-2">{{ wishlist.description }}</p>
+                            {% endif %}
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-500 text-sm">
+                                    <i class="fas fa-gift mr-1"></i> {{ wishlist.items|length }} items
+                                </span>
+                                <a href="{{ url_for('wishlist_detail', wishlist_id=wishlist.id) }}" class="text-blue-600 hover:text-blue-700 font-medium">
+                                    View <i class="fas fa-chevron-right ml-1"></i>
+                                </a>
+                            </div>
                         </div>
                     </div>
                 {% endfor %}
             </div>
         {% else %}
             <div class="bg-white rounded-lg shadow-md p-8 text-center">
+                <div class="mb-4 text-blue-500">
+                    <i class="fas fa-gift text-6xl"></i>
+                </div>
                 <h3 class="text-xl font-semibold text-gray-800 mb-4">You don't have any wishlists yet</h3>
                 <p class="text-gray-600 mb-6">Create your first wishlist to start saving your favorite gifts.</p>
-                <a href="{{ url_for('create_wishlist') }}" class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded inline-block">
+                <a href="{{ url_for('create_wishlist') }}" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded inline-block">
                     Create a Wishlist
                 </a>
             </div>
         {% endif %}
+        
+        <!-- Expert Lists Education Section -->
+        <div class="bg-white rounded-lg shadow-md p-8 text-center mt-12">
+            <h3 class="text-xl font-semibold text-purple-800 mb-4">Here's Your Chance to Show Off</h3>
+            <p class="text-gray-600 mb-6">Make lists of your best ideas for others</p>
+            
+            <p class="text-gray-600 mb-6">
+                Are your friends always asking you for advice on what to get? Now you can
+                build lists they can browse for ideas. Whether it's your favorite gear, or even
+                your own products, anyone can add these gifts to their own wish lists.
+            </p>
+            
+            <a href="{{ url_for('create_wishlist') }}?type=expert" class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded inline-block mb-4">
+                Create an Expert List
+            </a>
+            <div>
+                <a href="#" class="text-purple-600 hover:underline">or Learn More</a>
+            </div>
+        </div>
     </div>
 </div>
 {% endblock %}

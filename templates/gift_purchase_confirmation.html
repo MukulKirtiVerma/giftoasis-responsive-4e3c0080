@@ -1,0 +1,53 @@
+
+{% extends 'base.html' %}
+
+{% block title %}Confirm Purchase - GiftOasis{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-md mx-auto bg-white rounded-lg shadow-md p-8 text-center">
+        <h2 class="text-2xl font-bold text-gray-900 mb-4">Did You Buy This Gift?</h2>
+        
+        <div class="flex items-center mb-6">
+            <div class="w-20 h-20 mr-4 bg-gray-100 rounded overflow-hidden">
+                {% if gift.image_url %}
+                    <img src="{{ gift.image_url }}" alt="{{ gift.name }}" class="w-full h-full object-cover">
+                {% else %}
+                    <div class="w-full h-full flex items-center justify-center text-gray-400">
+                        <i class="fas fa-gift text-3xl"></i>
+                    </div>
+                {% endif %}
+            </div>
+            
+            <div class="text-left">
+                <h3 class="font-medium">{{ gift.name }}</h3>
+                <p class="text-gray-600">${{ gift.price }}</p>
+                <p class="text-gray-500">{{ gift.source_url|urlizetrunc(20) }}</p>
+            </div>
+        </div>
+        
+        <form method="POST" action="{{ url_for('confirm_purchase', wishlist_id=wishlist.id, gift_id=gift.id) }}">
+            {{ form.hidden_tag() }}
+            
+            <div class="mb-6">
+                <label class="block text-left text-gray-700 mb-2">How many did you buy?</label>
+                <div class="relative">
+                    {{ form.quantity(class="w-full bg-gray-100 border border-gray-300 rounded px-4 py-2 appearance-none") }}
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                </div>
+                <p class="text-left text-gray-500 text-sm mt-1">of {{ item.quantity }} requested</p>
+            </div>
+            
+            <div class="flex justify-center space-x-4">
+                <a href="{{ url_for('gift_detail', gift_id=gift.id) }}" class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-6 py-2 rounded">
+                    Cancel
+                </a>
+                
+                {{ form.submit(class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded") }}
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

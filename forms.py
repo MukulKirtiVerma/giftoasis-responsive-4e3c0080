@@ -25,7 +25,12 @@ class SignupForm(FlaskForm):
 class WishlistForm(FlaskForm):
     name = StringField('Wishlist Name', validators=[DataRequired(), Length(min=1, max=100)])
     description = TextAreaField('Description', validators=[Optional(), Length(max=500)])
+    list_type = SelectField('List Type', choices=[
+        ('wish_list', 'Wish List'),
+        ('expert_list', 'Expert List')
+    ], default='wish_list')
     is_public = BooleanField('Public Wishlist', default=True)
+    is_private_link = BooleanField('Private Link', default=False)
     is_expert_list = BooleanField('Expert List', default=False)
     header_image = FileField('Header Image', validators=[Optional()])
     show_confirmed_gifts = BooleanField('Show Confirmed Gifts', default=True)
@@ -129,3 +134,19 @@ class ResetPasswordForm(FlaskForm):
         EqualTo('password', message='Passwords must match')
     ])
     submit = SubmitField('Reset Password')
+
+class GiftPurchaseForm(FlaskForm):
+    quantity = SelectField('How many did you buy?', choices=[(1, '1'), (2, '2'), (3, '3'), (4, '4'), (5, '5')], 
+                          coerce=int, default=1)
+    submit = SubmitField('Confirm Purchase')
+
+class MoveGiftForm(FlaskForm):
+    destination_wishlist = SelectField('Move to Wishlist', coerce=int)
+    submit = SubmitField('Move Gift')
+
+class CopyLinkForm(FlaskForm):
+    submit = SubmitField('Copy Link to Clipboard')
+
+class SpoilerAlertForm(FlaskForm):
+    show_confirmed = SubmitField('Show Confirmed')
+    hide_confirmed = SubmitField('Cancel')
