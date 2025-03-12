@@ -783,4 +783,4 @@ def find_friends():
     )
 
 # Add routes for spoiler alert functionality
-@app.route('/wishlist/<int:
+@app.route('/wishlist/<int:wish
