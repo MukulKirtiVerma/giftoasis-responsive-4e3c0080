@@ -11,7 +11,7 @@
             <p class="text-purple-100">Share what you want with friends and family</p>
         </div>
         
-        <form method="POST" action="{{ url_for('create_wishlist') }}" enctype="multipart/form-data" class="p-6">
+        <form method="POST" action="{{ url_for('wishlists.create_wishlist') }}" enctype="multipart/form-data" class="p-6">
             {{ form.hidden_tag() }}
             
             <div class="mb-6">
@@ -115,7 +115,7 @@
             </div>
             
             <div class="flex justify-between mt-8">
-                <a href="{{ url_for('wishlists') }}" class="bg-gray-200 text-gray-800 px-6 py-2 rounded-lg hover:bg-gray-300 font-medium">
+                <a href="{{ url_for('wishlists.wishlists') }}" class="bg-gray-200 text-gray-800 px-6 py-2 rounded-lg hover:bg-gray-300 font-medium">
                     Cancel
                 </a>
                 <button type="submit" class="bg-purple-600 hover:bg-purple-700 text-white px-8 py-2 rounded-lg font-medium">
