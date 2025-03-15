@@ -14,21 +14,21 @@
         <div class="container mx-auto px-4">
             <div class="flex items-center justify-between h-16">
                 <div class="flex items-center gap-2">
-                    <a href="{{ url_for('index') }}" class="flex items-center gap-2">
+                    <a href="{{ url_for('main.index') }}" class="flex items-center gap-2">
                         <i class="fas fa-gift text-purple-600"></i>
                         <span class="text-xl font-bold text-purple-600">GiftOasis</span>
                     </a>
                 </div>
                 
                 <nav class="hidden md:flex items-center gap-6">
-                    <a href="{{ url_for('how_it_works') }}" class="text-gray-600 hover:text-purple-600 transition-colors">How it Works</a>
-                    <a href="{{ url_for('categories') }}" class="text-gray-600 hover:text-purple-600 transition-colors">Categories</a>
-                    <a href="{{ url_for('featured') }}" class="text-gray-600 hover:text-purple-600 transition-colors">Featured</a>
+                    <a href="{{ url_for('main.how_it_works') }}" class="text-gray-600 hover:text-purple-600 transition-colors">How it Works</a>
+                    <a href="{{ url_for('main.categories') }}" class="text-gray-600 hover:text-purple-600 transition-colors">Categories</a>
+                    <a href="{{ url_for('gifts.featured') }}" class="text-gray-600 hover:text-purple-600 transition-colors">Featured</a>
                     {% if current_user.is_authenticated %}
-                        <a href="{{ url_for('wishlists') }}" class="text-gray-600 hover:text-purple-600 transition-colors">My Wishlists</a>
-                        <a href="{{ url_for('logout') }}" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded">Logout</a>
+                        <a href="{{ url_for('wishlists.wishlists') }}" class="text-gray-600 hover:text-purple-600 transition-colors">My Wishlists</a>
+                        <a href="{{ url_for('auth.logout') }}" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded">Logout</a>
                     {% else %}
-                        <a href="{{ url_for('login') }}" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded">Login</a>
+                        <a href="{{ url_for('auth.login') }}" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded">Login</a>
                     {% endif %}
                 </nav>
                 
@@ -41,14 +41,14 @@
         <!-- Mobile menu -->
         <div class="md:hidden hidden mobile-menu">
             <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white border-b">
-                <a href="{{ url_for('how_it_works') }}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-purple-600 hover:bg-gray-50">How it Works</a>
-                <a href="{{ url_for('categories') }}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-purple-600 hover:bg-gray-50">Categories</a>
-                <a href="{{ url_for('featured') }}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-purple-600 hover:bg-gray-50">Featured</a>
+                <a href="{{ url_for('main.how_it_works') }}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-purple-600 hover:bg-gray-50">How it Works</a>
+                <a href="{{ url_for('main.categories') }}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-purple-600 hover:bg-gray-50">Categories</a>
+                <a href="{{ url_for('gifts.featured') }}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-purple-600 hover:bg-gray-50">Featured</a>
                 {% if current_user.is_authenticated %}
-                    <a href="{{ url_for('wishlists') }}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-purple-600 hover:bg-gray-50">My Wishlists</a>
-                    <a href="{{ url_for('logout') }}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-purple-600 hover:bg-gray-50">Logout</a>
+                    <a href="{{ url_for('wishlists.wishlists') }}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-purple-600 hover:bg-gray-50">My Wishlists</a>
+                    <a href="{{ url_for('auth.logout') }}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-purple-600 hover:bg-gray-50">Logout</a>
                 {% else %}
-                    <a href="{{ url_for('login') }}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-purple-600 hover:bg-gray-50">Login</a>
+                    <a href="{{ url_for('auth.login') }}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-purple-600 hover:bg-gray-50">Login</a>
                 {% endif %}
             </div>
         </div>
@@ -80,11 +80,11 @@
                 <div>
                     <h3 class="text-lg font-bold mb-4">Quick Links</h3>
                     <ul class="space-y-2">
-                        <li><a href="{{ url_for('index') }}" class="text-gray-400 hover:text-white transition-colors">Home</a></li>
-                        <li><a href="{{ url_for('categories') }}" class="text-gray-400 hover:text-white transition-colors">Categories</a></li>
-                        <li><a href="{{ url_for('featured') }}" class="text-gray-400 hover:text-white transition-colors">Featured</a></li>
+                        <li><a href="{{ url_for('main.index') }}" class="text-gray-400 hover:text-white transition-colors">Home</a></li>
+                        <li><a href="{{ url_for('main.categories') }}" class="text-gray-400 hover:text-white transition-colors">Categories</a></li>
+                        <li><a href="{{ url_for('gifts.featured') }}" class="text-gray-400 hover:text-white transition-colors">Featured</a></li>
                         {% if current_user.is_authenticated %}
-                            <li><a href="{{ url_for('wishlists') }}" class="text-gray-400 hover:text-white transition-colors">My Wishlists</a></li>
+                            <li><a href="{{ url_for('wishlists.wishlists') }}" class="text-gray-400 hover:text-white transition-colors">My Wishlists</a></li>
                         {% endif %}
                     </ul>
                 </div>

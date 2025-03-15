@@ -11,17 +11,17 @@
             <p class="text-xl text-gray-700 mb-8">GiftOasis helps you discover thoughtful, unique gifts for any occasion.</p>
             <div class="flex flex-col sm:flex-row justify-center gap-4">
                 {% if current_user.is_authenticated %}
-                    <a href="{{ url_for('categories') }}" class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg text-lg font-medium">
+                    <a href="{{ url_for('main.categories') }}" class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg text-lg font-medium">
                         Explore Categories
                     </a>
-                    <a href="{{ url_for('wishlists') }}" class="bg-white border-2 border-purple-600 text-purple-600 hover:bg-purple-50 px-6 py-3 rounded-lg text-lg font-medium">
+                    <a href="{{ url_for('wishlists.wishlists') }}" class="bg-white border-2 border-purple-600 text-purple-600 hover:bg-purple-50 px-6 py-3 rounded-lg text-lg font-medium">
                         My Wishlists
                     </a>
                 {% else %}
-                    <a href="{{ url_for('login') }}" class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg text-lg font-medium">
+                    <a href="{{ url_for('auth.login') }}" class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg text-lg font-medium">
                         Log In
                     </a>
-                    <a href="{{ url_for('signup') }}" class="bg-white border-2 border-purple-600 text-purple-600 hover:bg-purple-50 px-6 py-3 rounded-lg text-lg font-medium">
+                    <a href="{{ url_for('auth.signup') }}" class="bg-white border-2 border-purple-600 text-purple-600 hover:bg-purple-50 px-6 py-3 rounded-lg text-lg font-medium">
                         Sign Up
                     </a>
                 {% endif %}
@@ -39,7 +39,7 @@
                     <h2 class="text-3xl font-bold text-gray-900">Featured Gifts</h2>
                     <p class="text-gray-600 mt-2">Our handpicked selection of top gifts</p>
                 </div>
-                <a href="{{ url_for('featured') }}" class="text-purple-600 hover:text-purple-700 font-medium">
+                <a href="{{ url_for('gifts.featured') }}" class="text-purple-600 hover:text-purple-700 font-medium">
                     View All →
                 </a>
             </div>
@@ -56,7 +56,7 @@
                             <p class="text-gray-600 mb-2 line-clamp-2">{{ gift.description }}</p>
                             <p class="text-purple-600 font-bold mb-4">${{ gift.price }}</p>
                             
-                            <a href="{{ url_for('gift_detail', gift_id=gift.id) }}" class="text-purple-600 hover:text-purple-700">
+                            <a href="{{ url_for('gifts.gift_detail', gift_id=gift.id) }}" class="text-purple-600 hover:text-purple-700">
                                 View Details
                             </a>
                         </div>
@@ -103,7 +103,7 @@
             </div>
             
             <div class="text-center mt-12">
-                <a href="{{ url_for('how_it_works') }}" class="text-purple-600 hover:text-purple-700 font-medium">
+                <a href="{{ url_for('main.how_it_works') }}" class="text-purple-600 hover:text-purple-700 font-medium">
                     Learn More About How It Works →
                 </a>
             </div>
