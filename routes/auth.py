@@ -66,7 +66,7 @@ def google_login():
     redirect_uri = url_for('auth.google_auth', _external=True)
     return google.authorize_redirect(redirect_uri)
 
-@auth_bp.route('/google-auth')
+@auth_bp.route('/auth/google/callback')
 def google_auth():
     global google
     if not google:
