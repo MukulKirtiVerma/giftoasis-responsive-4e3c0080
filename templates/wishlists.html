@@ -54,9 +54,9 @@
             </div>
         </div>
 
-        {% if wishlists %}
+        {% if my_wishlists %}
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {% for wishlist in wishlists %}
+                {% for wishlist in my_wishlists %}
                     <div class="bg-white rounded-lg shadow-md overflow-hidden transition-transform duration-200 hover:shadow-lg hover:-translate-y-1">
                         <div class="h-32 bg-blue-100 relative">
                             {% if wishlist.header_image %}
@@ -103,6 +103,141 @@
                 <a href="{{ url_for('wishlists.create_wishlist') }}" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded inline-block">
                     Create a Wishlist
                 </a>
+            </div>
+        {% endif %}
+        
+        {% if bookmarked_wishlists %}
+            <div class="mt-12 mb-8">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6">Bookmarked Wishlists</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {% for wishlist in bookmarked_wishlists %}
+                        <div class="bg-white rounded-lg shadow-md overflow-hidden transition-transform duration-200 hover:shadow-lg hover:-translate-y-1">
+                            <div class="h-32 bg-blue-100 relative">
+                                {% if wishlist.header_image %}
+                                    <img src="{{ wishlist.header_image }}" alt="{{ wishlist.name }}" class="w-full h-full object-cover">
+                                {% endif %}
+                                
+                                {% if wishlist.is_expert_list %}
+                                    <div class="absolute top-4 left-4 px-3 py-1 bg-purple-100 text-purple-700 text-sm rounded-full">
+                                        <i class="fas fa-star mr-1"></i> Expert List
+                                    </div>
+                                {% endif %}
+                                
+                                <div class="absolute top-4 right-4">
+                                    <form method="POST" action="{{ url_for('wishlists.remove_bookmark', wishlist_id=wishlist.id) }}">
+                                        <button type="submit" class="bg-white text-gray-600 hover:text-red-600 p-2 rounded-full">
+                                            <i class="fas fa-bookmark"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                            
+                            <div class="p-4">
+                                <div class="flex items-center mb-2">
+                                    <div class="w-6 h-6 rounded-full bg-gray-200 mr-2 overflow-hidden">
+                                        {% if wishlist.user.profile_image %}
+                                            <img src="{{ wishlist.user.profile_image }}" alt="{{ wishlist.user.name }}" class="w-full h-full object-cover">
+                                        {% else %}
+                                            <div class="w-full h-full flex items-center justify-center bg-blue-100">
+                                                <span class="text-xs font-bold text-blue-600">{{ wishlist.user.name[0] }}</span>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    <a href="{{ url_for('users.user_profile', user_id=wishlist.user.id) }}" class="text-gray-700 hover:text-blue-600 font-medium">
+                                        {{ wishlist.user.name }}
+                                    </a>
+                                </div>
+                                
+                                <h2 class="text-xl font-semibold mb-2">{{ wishlist.name }}</h2>
+                                {% if wishlist.description %}
+                                    <p class="text-gray-600 mb-4 line-clamp-2">{{ wishlist.description }}</p>
+                                {% endif %}
+                                <div class="flex justify-between items-center">
+                                    <span class="text-gray-500 text-sm">
+                                        <i class="fas fa-gift mr-1"></i> {{ wishlist.items|length }} items
+                                    </span>
+                                    <a href="{{ url_for('wishlists.wishlist_detail', wishlist_id=wishlist.id) }}" class="text-blue-600 hover:text-blue-700 font-medium">
+                                        View <i class="fas fa-chevron-right ml-1"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+        
+        {% if reserved_gifts or purchased_gifts %}
+            <div class="mt-12 mb-8">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6">Gifts You're Managing</h2>
+                
+                {% if reserved_gifts %}
+                    <div class="mb-8">
+                        <h3 class="text-xl font-semibold text-gray-800 mb-4">Reserved Gifts</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {% for item in reserved_gifts %}
+                                <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                                    <div class="h-32 bg-gray-100 relative">
+                                        {% if item.gift.image_url %}
+                                            <img src="{{ item.gift.image_url }}" alt="{{ item.gift.name }}" class="w-full h-full object-cover">
+                                        {% endif %}
+                                        <div class="absolute top-2 right-2">
+                                            <span class="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full">Reserved</span>
+                                        </div>
+                                    </div>
+                                    <div class="p-4">
+                                        <h3 class="font-medium mb-1">{{ item.gift.name }}</h3>
+                                        <p class="text-sm text-gray-500 mb-2">
+                                            From {{ item.wishlist.user.name }}'s wishlist
+                                        </p>
+                                        <div class="flex justify-between">
+                                            <span class="text-purple-600 font-bold">${{ item.gift.price }}</span>
+                                            <div>
+                                                <form method="POST" action="{{ url_for('wishlists.mark_purchased', wishlist_id=item.wishlist.id, gift_id=item.gift.id) }}" class="inline">
+                                                    <button type="submit" class="text-green-600 hover:text-green-700 mr-2" title="Mark as purchased">
+                                                        <i class="fas fa-check"></i>
+                                                    </button>
+                                                </form>
+                                                <form method="POST" action="{{ url_for('wishlists.unreserve_gift', wishlist_id=item.wishlist.id, gift_id=item.gift.id) }}" class="inline">
+                                                    <button type="submit" class="text-red-600 hover:text-red-700" title="Cancel reservation">
+                                                        <i class="fas fa-times"></i>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
+                
+                {% if purchased_gifts %}
+                    <div>
+                        <h3 class="text-xl font-semibold text-gray-800 mb-4">Purchased Gifts</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {% for item in purchased_gifts %}
+                                <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                                    <div class="h-32 bg-gray-100 relative">
+                                        {% if item.gift.image_url %}
+                                            <img src="{{ item.gift.image_url }}" alt="{{ item.gift.name }}" class="w-full h-full object-cover">
+                                        {% endif %}
+                                        <div class="absolute top-2 right-2">
+                                            <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">Purchased</span>
+                                        </div>
+                                    </div>
+                                    <div class="p-4">
+                                        <h3 class="font-medium mb-1">{{ item.gift.name }}</h3>
+                                        <p class="text-sm text-gray-500 mb-2">
+                                            For {{ item.wishlist.user.name }}
+                                        </p>
+                                        <div class="text-purple-600 font-bold">${{ item.gift.price }}</div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
             </div>
         {% endif %}
         
