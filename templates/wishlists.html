@@ -14,7 +14,7 @@
             <div class="bg-gradient-to-r from-blue-100 to-blue-50 rounded-lg shadow-md overflow-hidden">
                 <div class="p-6 relative">
                     <div class="absolute top-4 right-4">
-                        <a href="{{ url_for('create_wishlist') }}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded flex items-center">
+                        <a href="{{ url_for('wishlists.create_wishlist') }}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded flex items-center">
                             <i class="fas fa-plus mr-2"></i> New Wish List
                         </a>
                     </div>
@@ -36,7 +36,7 @@
             <div class="bg-gradient-to-r from-purple-100 to-purple-50 rounded-lg shadow-md overflow-hidden">
                 <div class="p-6 relative">
                     <div class="absolute top-4 right-4">
-                        <a href="{{ url_for('create_wishlist') }}?type=expert" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded flex items-center">
+                        <a href="{{ url_for('wishlists.create_wishlist') }}?type=expert" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded flex items-center">
                             <i class="fas fa-plus mr-2"></i> New Expert List
                         </a>
                     </div>
@@ -85,7 +85,7 @@
                                 <span class="text-gray-500 text-sm">
                                     <i class="fas fa-gift mr-1"></i> {{ wishlist.items|length }} items
                                 </span>
-                                <a href="{{ url_for('wishlist_detail', wishlist_id=wishlist.id) }}" class="text-blue-600 hover:text-blue-700 font-medium">
+                                <a href="{{ url_for('wishlists.wishlist_detail', wishlist_id=wishlist.id) }}" class="text-blue-600 hover:text-blue-700 font-medium">
                                     View <i class="fas fa-chevron-right ml-1"></i>
                                 </a>
                             </div>
@@ -100,7 +100,7 @@
                 </div>
                 <h3 class="text-xl font-semibold text-gray-800 mb-4">You don't have any wishlists yet</h3>
                 <p class="text-gray-600 mb-6">Create your first wishlist to start saving your favorite gifts.</p>
-                <a href="{{ url_for('create_wishlist') }}" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded inline-block">
+                <a href="{{ url_for('wishlists.create_wishlist') }}" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded inline-block">
                     Create a Wishlist
                 </a>
             </div>
@@ -117,7 +117,7 @@
                 your own products, anyone can add these gifts to their own wish lists.
             </p>
             
-            <a href="{{ url_for('create_wishlist') }}?type=expert" class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded inline-block mb-4">
+            <a href="{{ url_for('wishlists.create_wishlist') }}?type=expert" class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded inline-block mb-4">
                 Create an Expert List
             </a>
             <div>

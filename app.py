@@ -64,4 +64,4 @@ from routes.auth import auth_bp
 auth_bp.google = oauth.google
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True,use_reloader=False)

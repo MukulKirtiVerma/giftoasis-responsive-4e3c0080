@@ -1,5 +1,5 @@
 
-from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify
+from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify, session
 from flask_login import login_required, current_user
 from models import db, Wishlist, WishlistItem, WishlistBookmark, Gift, User
 from forms import WishlistForm, GiftForm, GiftFromURLForm, WishlistItemForm
@@ -20,35 +20,35 @@ def wishlists():
     bookmarked_ids = db.session.query(WishlistBookmark.wishlist_id).filter_by(user_id=current_user.id).all()
     bookmarked_ids = [id[0] for id in bookmarked_ids]
     bookmarked_wishlists = Wishlist.query.filter(Wishlist.id.in_(bookmarked_ids)).all()
-    
+
     # Get reserved and purchased gifts
     reserved_items = WishlistItem.query.filter_by(reserved_by=current_user.id, status='reserved').all()
     purchased_items = WishlistItem.query.filter_by(reserved_by=current_user.id, status='purchased').all()
-    
+
     # Get the gifts and wishlists for these items
     reserved_gifts = []
     purchased_gifts = []
-    
+
     for item in reserved_items:
         gift = Gift.query.get(item.gift_id)
         wishlist = Wishlist.query.get(item.wishlist_id)
         if gift and wishlist:
             reserved_gifts.append({
-                'gift': gift, 
+                'gift': gift,
                 'wishlist': wishlist,
                 'item': item
             })
-    
+
     for item in purchased_items:
         gift = Gift.query.get(item.gift_id)
         wishlist = Wishlist.query.get(item.wishlist_id)
         if gift and wishlist:
             purchased_gifts.append({
-                'gift': gift, 
+                'gift': gift,
                 'wishlist': wishlist,
                 'item': item
             })
-    
+
     return render_template(
         'wishlists.html', 
         my_wishlists=my_wishlists, 
