@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { 
   DropdownMenu, 
   DropdownMenuContent, 
@@ -42,8 +42,12 @@ const ItemDropdownMenu = ({
   align = "end",
   side = "bottom"
 }: ItemDropdownMenuProps) => {
-  
-  const handleCopyLink = () => {
+  const [open, setOpen] = useState(false);
+
+  const handleCopyLink = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
     // Generate a shareable link based on item type and ID
     const baseUrl = window.location.origin;
     const link = type === 'wishlist' 
@@ -55,7 +59,10 @@ const ItemDropdownMenu = ({
       .catch(() => toast.error("Failed to copy link"));
   };
 
-  const handleDelete = () => {
+  const handleDelete = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
     if (type === 'wishlist') {
       // Redirect to the Flask route for deleting a wishlist
       window.location.href = `/wishlists/delete/${itemId}`;
@@ -65,18 +72,27 @@ const ItemDropdownMenu = ({
     }
   };
 
-  const handleMoveToWishlist = () => {
+  const handleMoveToWishlist = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
     // Redirect to the Flask route for moving a gift to a wishlist
     window.location.href = `/gifts/${itemId}/move`;
   };
 
-  const handleMoveToNewWishlist = () => {
+  const handleMoveToNewWishlist = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
     if (onOpenWishlistModal) {
       onOpenWishlistModal();
     }
   };
 
-  const handleAddGift = () => {
+  const handleAddGift = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
     if (onOpenGiftModal && type === 'wishlist') {
       onOpenGiftModal(itemId);
     } else {
@@ -85,12 +101,18 @@ const ItemDropdownMenu = ({
     }
   };
 
-  const handleTogglePrivacy = () => {
+  const handleTogglePrivacy = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
     // Redirect to the Flask route for toggling wishlist privacy
     window.location.href = `/wishlists/${itemId}/toggle_privacy`;
   };
 
-  const handleEditItem = () => {
+  const handleEditItem = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
     if (type === 'wishlist') {
       // Redirect to the Flask route for editing a wishlist
       window.location.href = `/wishlists/edit/${itemId}`;
@@ -100,7 +122,10 @@ const ItemDropdownMenu = ({
     }
   };
 
-  const handleViewItem = () => {
+  const handleViewItem = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
     if (type === 'wishlist') {
       // Redirect to the Flask route for viewing a wishlist
       window.location.href = `/wishlists/${itemId}`;
@@ -110,18 +135,28 @@ const ItemDropdownMenu = ({
     }
   };
 
-  const handleShareWishlist = () => {
+  const handleShareWishlist = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
     // Redirect to the Flask route for sharing a wishlist
     window.location.href = `/wishlists/${itemId}/share`;
   };
 
+  const handleButtonClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setOpen(!open);
+  };
+
   return (
-    <DropdownMenu>
+    <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger asChild>
         <Button 
           variant="outline" 
           size="icon" 
           className="h-8 w-8 bg-gray-200 hover:bg-gray-300 border border-gray-300 rounded-full flex items-center justify-center p-0"
+          onClick={handleButtonClick}
         >
           <MoreVertical className="h-4 w-4" />
           <span className="sr-only">Open menu</span>
@@ -130,7 +165,7 @@ const ItemDropdownMenu = ({
       <DropdownMenuContent 
         align={align} 
         side={side} 
-        className="w-56 bg-white shadow-lg rounded-md border border-gray-200 z-50"
+        className="w-56 bg-white shadow-lg rounded-md border border-gray-200 z-[100]"
       >
         <DropdownMenuItem onClick={handleViewItem} className="cursor-pointer">
           <ExternalLink className="mr-2 h-4 w-4" />

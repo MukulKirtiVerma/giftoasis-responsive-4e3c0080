@@ -53,6 +53,10 @@ const Wishlists = () => {
     setWishlistModalOpen(true);
   };
 
+  const handleCardClick = (wishlistId: number) => {
+    window.location.href = `/wishlists/${wishlistId}`;
+  };
+
   return (
     <div className="container mx-auto py-10 px-4">
       <div className="max-w-7xl mx-auto">
@@ -118,7 +122,11 @@ const Wishlists = () => {
         {wishlists.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
             {wishlists.map((wishlist) => (
-              <Card key={wishlist.id} className="overflow-hidden transition-all duration-200 hover:shadow-lg hover:-translate-y-1 relative">
+              <Card 
+                key={wishlist.id} 
+                className="overflow-hidden transition-all duration-200 hover:shadow-lg hover:-translate-y-1 relative cursor-pointer"
+                onClick={() => handleCardClick(wishlist.id)}
+              >
                 <div className="h-32 bg-blue-100 relative">
                   {wishlist.headerImage && (
                     <img 
@@ -142,8 +150,11 @@ const Wishlists = () => {
                     )}
                   </div>
                   
-                  {/* Dropdown Menu Positioned in the top-right corner with explicit styling */}
-                  <div className="absolute top-3 right-3 z-20">
+                  {/* Dropdown Menu with enhanced positioning and z-index */}
+                  <div 
+                    className="absolute top-3 right-3 z-50" 
+                    onClick={(e) => e.stopPropagation()}
+                  >
                     <ItemDropdownMenu 
                       type="wishlist" 
                       itemId={wishlist.id} 
@@ -166,11 +177,14 @@ const Wishlists = () => {
                     <Gift className="h-4 w-4 mr-1" /> {wishlist.itemCount} items
                   </span>
                   
-                  <div className="flex gap-2">
+                  <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
                     <Button 
                       variant="ghost" 
                       size="icon" 
-                      onClick={() => window.location.href = `/wishlists/${wishlist.id}`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        window.location.href = `/wishlists/${wishlist.id}`;
+                      }}
                     >
                       <Eye className="h-4 w-4" />
                     </Button>
@@ -178,7 +192,10 @@ const Wishlists = () => {
                     <Button 
                       variant="ghost" 
                       size="icon"
-                      onClick={() => openGiftModal(wishlist.id)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        openGiftModal(wishlist.id);
+                      }}
                     >
                       <Plus className="h-4 w-4" />
                     </Button>
