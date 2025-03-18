@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Gift, ListPlus, Plus, Star, Lock, Info, Bookmark, Eye } from "lucide-react";
 import WishlistModal from "@/components/WishlistModal";
 import GiftModal from "@/components/GiftModal";
+import ItemDropdownMenu from "@/components/ui/item-dropdown-menu";
 
 // Sample wishlist data
 const wishlists = [
@@ -46,6 +47,10 @@ const Wishlists = () => {
   const openGiftModal = (wishlistId: number) => {
     setSelectedWishlistId(wishlistId);
     setGiftModalOpen(true);
+  };
+
+  const openWishlistModal = () => {
+    setWishlistModalOpen(true);
   };
 
   return (
@@ -135,6 +140,16 @@ const Wishlists = () => {
                         <Lock className="h-3 w-3" /> Private
                       </Badge>
                     )}
+                  </div>
+                  
+                  <div className="absolute top-3 right-3">
+                    <ItemDropdownMenu 
+                      type="wishlist" 
+                      itemId={wishlist.id} 
+                      isPrivate={!wishlist.isPublic}
+                      onOpenGiftModal={openGiftModal}
+                      onOpenWishlistModal={openWishlistModal}
+                    />
                   </div>
                 </div>
                 
