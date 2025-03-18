@@ -4,7 +4,8 @@ import {
   DropdownMenu, 
   DropdownMenuContent, 
   DropdownMenuItem, 
-  DropdownMenuTrigger 
+  DropdownMenuTrigger,
+  DropdownMenuSeparator
 } from "@/components/ui/dropdown-menu";
 import { 
   Copy, 
@@ -14,7 +15,10 @@ import {
   Plus, 
   Trash, 
   Lock,
-  Globe
+  Globe,
+  ExternalLink,
+  Edit,
+  MoreVertical
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -25,6 +29,8 @@ interface ItemDropdownMenuProps {
   isPrivate?: boolean;
   onOpenGiftModal?: (wishlistId: number) => void;
   onOpenWishlistModal?: () => void;
+  align?: "start" | "end" | "center";
+  side?: "top" | "right" | "bottom" | "left";
 }
 
 const ItemDropdownMenu = ({ 
@@ -32,7 +38,9 @@ const ItemDropdownMenu = ({
   itemId, 
   isPrivate = false,
   onOpenGiftModal,
-  onOpenWishlistModal
+  onOpenWishlistModal,
+  align = "end",
+  side = "bottom"
 }: ItemDropdownMenuProps) => {
   
   const handleCopyLink = () => {
@@ -81,27 +89,34 @@ const ItemDropdownMenu = ({
     toast.success(`Wishlist is now ${newState ? 'private' : 'public'}`);
   };
 
+  const handleEditItem = () => {
+    console.log(`Edit ${type} ${itemId}`);
+    toast.success(`Editing ${type}`);
+  };
+
+  const handleViewItem = () => {
+    console.log(`View ${type} ${itemId}`);
+    const baseUrl = window.location.origin;
+    const link = type === 'wishlist' 
+      ? `${baseUrl}/wishlist/${itemId}` 
+      : `${baseUrl}/gift/${itemId}`;
+    
+    window.location.href = link;
+  };
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="h-8 w-8">
-          <MoreHorizontal className="h-4 w-4" />
+        <Button variant="ghost" size="icon" className="h-8 w-8 bg-white hover:bg-gray-100">
+          <MoreVertical className="h-4 w-4" />
           <span className="sr-only">Open menu</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        {type === 'gift' && (
-          <>
-            <DropdownMenuItem onClick={handleMoveToWishlist}>
-              <MoveRight className="mr-2 h-4 w-4" />
-              <span>Move to Wish List</span>
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={handleMoveToNewWishlist}>
-              <Plus className="mr-2 h-4 w-4" />
-              <span>Move to New Wish List</span>
-            </DropdownMenuItem>
-          </>
-        )}
+      <DropdownMenuContent align={align} side={side} className="w-56 bg-white">
+        <DropdownMenuItem onClick={handleViewItem}>
+          <ExternalLink className="mr-2 h-4 w-4" />
+          <span>View {type === 'wishlist' ? 'Wishlist' : 'Gift'}</span>
+        </DropdownMenuItem>
         
         {type === 'wishlist' && (
           <DropdownMenuItem onClick={handleAddGift}>
@@ -110,30 +125,53 @@ const ItemDropdownMenu = ({
           </DropdownMenuItem>
         )}
         
-        <DropdownMenuItem onClick={handleCopyLink}>
-          <Copy className="mr-2 h-4 w-4" />
-          <span>Copy Link to Clipboard</span>
+        <DropdownMenuItem onClick={handleEditItem}>
+          <Edit className="mr-2 h-4 w-4" />
+          <span>Edit {type === 'wishlist' ? 'Wishlist' : 'Gift'}</span>
         </DropdownMenuItem>
         
-        {type === 'wishlist' && (
-          <DropdownMenuItem onClick={handleTogglePrivacy}>
-            {isPrivate ? (
-              <>
-                <Globe className="mr-2 h-4 w-4" />
-                <span>Make Public</span>
-              </>
-            ) : (
-              <>
-                <Lock className="mr-2 h-4 w-4" />
-                <span>Make Private</span>
-              </>
-            )}
-          </DropdownMenuItem>
+        <DropdownMenuItem onClick={handleCopyLink}>
+          <Copy className="mr-2 h-4 w-4" />
+          <span>Copy Link</span>
+        </DropdownMenuItem>
+        
+        {type === 'gift' && (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={handleMoveToWishlist}>
+              <MoveRight className="mr-2 h-4 w-4" />
+              <span>Move to Wish List</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={handleMoveToNewWishlist}>
+              <ListPlus className="mr-2 h-4 w-4" />
+              <span>Move to New Wish List</span>
+            </DropdownMenuItem>
+          </>
         )}
         
+        {type === 'wishlist' && (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={handleTogglePrivacy}>
+              {isPrivate ? (
+                <>
+                  <Globe className="mr-2 h-4 w-4" />
+                  <span>Make Public</span>
+                </>
+              ) : (
+                <>
+                  <Lock className="mr-2 h-4 w-4" />
+                  <span>Make Private</span>
+                </>
+              )}
+            </DropdownMenuItem>
+          </>
+        )}
+        
+        <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleDelete} className="text-red-600">
           <Trash className="mr-2 h-4 w-4" />
-          <span>Delete {type === 'wishlist' ? 'Wishlist' : 'Item'}</span>
+          <span>Delete {type === 'wishlist' ? 'Wishlist' : 'Gift'}</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

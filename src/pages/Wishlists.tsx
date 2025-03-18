@@ -142,7 +142,7 @@ const Wishlists = () => {
                     )}
                   </div>
                   
-                  <div className="absolute top-3 right-3">
+                  <div className="absolute top-3 right-3 z-10">
                     <ItemDropdownMenu 
                       type="wishlist" 
                       itemId={wishlist.id} 
