@@ -10,7 +10,6 @@ import {
 import { 
   Copy, 
   ListPlus, 
-  MoreHorizontal, 
   MoveRight, 
   Plus, 
   Trash, 
@@ -18,7 +17,8 @@ import {
   Globe,
   ExternalLink,
   Edit,
-  MoreVertical
+  MoreVertical,
+  Share
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -57,92 +57,114 @@ const ItemDropdownMenu = ({
 
   const handleDelete = () => {
     if (type === 'wishlist') {
-      console.log(`Delete wishlist ${itemId}`);
-      toast.success("Wishlist deleted successfully");
+      // Redirect to the Flask route for deleting a wishlist
+      window.location.href = `/wishlists/delete/${itemId}`;
     } else {
-      console.log(`Delete gift ${itemId}`);
-      toast.success("Gift removed successfully");
+      // Redirect to the Flask route for deleting a gift
+      window.location.href = `/gifts/delete/${itemId}`;
     }
   };
 
   const handleMoveToWishlist = () => {
-    console.log(`Move item ${itemId} to wishlist`);
-    toast.success("Item moved to wishlist");
+    // Redirect to the Flask route for moving a gift to a wishlist
+    window.location.href = `/gifts/${itemId}/move`;
   };
 
   const handleMoveToNewWishlist = () => {
     if (onOpenWishlistModal) {
       onOpenWishlistModal();
     }
-    console.log(`Move item ${itemId} to new wishlist`);
   };
 
   const handleAddGift = () => {
     if (onOpenGiftModal && type === 'wishlist') {
       onOpenGiftModal(itemId);
+    } else {
+      // Fallback to the Flask route for adding a gift to a wishlist
+      window.location.href = `/wishlists/${itemId}/add_gift`;
     }
   };
 
   const handleTogglePrivacy = () => {
-    const newState = !isPrivate;
-    console.log(`Set wishlist ${itemId} privacy to ${newState ? 'private' : 'public'}`);
-    toast.success(`Wishlist is now ${newState ? 'private' : 'public'}`);
+    // Redirect to the Flask route for toggling wishlist privacy
+    window.location.href = `/wishlists/${itemId}/toggle_privacy`;
   };
 
   const handleEditItem = () => {
-    console.log(`Edit ${type} ${itemId}`);
-    toast.success(`Editing ${type}`);
+    if (type === 'wishlist') {
+      // Redirect to the Flask route for editing a wishlist
+      window.location.href = `/wishlists/edit/${itemId}`;
+    } else {
+      // Redirect to the Flask route for editing a gift
+      window.location.href = `/gifts/${itemId}/edit`;
+    }
   };
 
   const handleViewItem = () => {
-    console.log(`View ${type} ${itemId}`);
-    const baseUrl = window.location.origin;
-    const link = type === 'wishlist' 
-      ? `${baseUrl}/wishlist/${itemId}` 
-      : `${baseUrl}/gift/${itemId}`;
-    
-    window.location.href = link;
+    if (type === 'wishlist') {
+      // Redirect to the Flask route for viewing a wishlist
+      window.location.href = `/wishlists/${itemId}`;
+    } else {
+      // Redirect to the Flask route for viewing a gift
+      window.location.href = `/gifts/${itemId}`;
+    }
+  };
+
+  const handleShareWishlist = () => {
+    // Redirect to the Flask route for sharing a wishlist
+    window.location.href = `/wishlists/${itemId}/share`;
   };
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="h-8 w-8 bg-white hover:bg-gray-100">
+        <Button 
+          variant="outline" 
+          size="icon" 
+          className="h-8 w-8 rounded-full border border-gray-200 bg-white hover:bg-gray-100 absolute right-2 top-2 z-10"
+        >
           <MoreVertical className="h-4 w-4" />
           <span className="sr-only">Open menu</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align={align} side={side} className="w-56 bg-white">
-        <DropdownMenuItem onClick={handleViewItem}>
+      <DropdownMenuContent align={align} side={side} className="w-56 bg-white shadow-md z-50">
+        <DropdownMenuItem onClick={handleViewItem} className="cursor-pointer">
           <ExternalLink className="mr-2 h-4 w-4" />
           <span>View {type === 'wishlist' ? 'Wishlist' : 'Gift'}</span>
         </DropdownMenuItem>
         
         {type === 'wishlist' && (
-          <DropdownMenuItem onClick={handleAddGift}>
+          <DropdownMenuItem onClick={handleAddGift} className="cursor-pointer">
             <Plus className="mr-2 h-4 w-4" />
             <span>Add Gift</span>
           </DropdownMenuItem>
         )}
         
-        <DropdownMenuItem onClick={handleEditItem}>
+        <DropdownMenuItem onClick={handleEditItem} className="cursor-pointer">
           <Edit className="mr-2 h-4 w-4" />
           <span>Edit {type === 'wishlist' ? 'Wishlist' : 'Gift'}</span>
         </DropdownMenuItem>
         
-        <DropdownMenuItem onClick={handleCopyLink}>
+        <DropdownMenuItem onClick={handleCopyLink} className="cursor-pointer">
           <Copy className="mr-2 h-4 w-4" />
           <span>Copy Link</span>
         </DropdownMenuItem>
         
+        {type === 'wishlist' && (
+          <DropdownMenuItem onClick={handleShareWishlist} className="cursor-pointer">
+            <Share className="mr-2 h-4 w-4" />
+            <span>Share Wishlist</span>
+          </DropdownMenuItem>
+        )}
+        
         {type === 'gift' && (
           <>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleMoveToWishlist}>
+            <DropdownMenuItem onClick={handleMoveToWishlist} className="cursor-pointer">
               <MoveRight className="mr-2 h-4 w-4" />
               <span>Move to Wish List</span>
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={handleMoveToNewWishlist}>
+            <DropdownMenuItem onClick={handleMoveToNewWishlist} className="cursor-pointer">
               <ListPlus className="mr-2 h-4 w-4" />
               <span>Move to New Wish List</span>
             </DropdownMenuItem>
@@ -152,7 +174,7 @@ const ItemDropdownMenu = ({
         {type === 'wishlist' && (
           <>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleTogglePrivacy}>
+            <DropdownMenuItem onClick={handleTogglePrivacy} className="cursor-pointer">
               {isPrivate ? (
                 <>
                   <Globe className="mr-2 h-4 w-4" />
@@ -169,7 +191,7 @@ const ItemDropdownMenu = ({
         )}
         
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={handleDelete} className="text-red-600">
+        <DropdownMenuItem onClick={handleDelete} className="text-red-600 cursor-pointer">
           <Trash className="mr-2 h-4 w-4" />
           <span>Delete {type === 'wishlist' ? 'Wishlist' : 'Gift'}</span>
         </DropdownMenuItem>

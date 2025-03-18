@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -128,7 +127,7 @@ const Wishlists = () => {
                     />
                   )}
                   
-                  <div className="absolute top-3 left-3 flex gap-2">
+                  <div className="absolute top-3 left-3 flex gap-2 z-10">
                     {wishlist.isExpertList && (
                       <Badge className="bg-purple-100 text-purple-700 hover:bg-purple-200 flex gap-1">
                         <Star className="h-3 w-3" /> Expert List
@@ -142,15 +141,14 @@ const Wishlists = () => {
                     )}
                   </div>
                   
-                  <div className="absolute top-3 right-3 z-10">
-                    <ItemDropdownMenu 
-                      type="wishlist" 
-                      itemId={wishlist.id} 
-                      isPrivate={!wishlist.isPublic}
-                      onOpenGiftModal={openGiftModal}
-                      onOpenWishlistModal={openWishlistModal}
-                    />
-                  </div>
+                  {/* Dropdown Menu Positioned in the top-right corner */}
+                  <ItemDropdownMenu 
+                    type="wishlist" 
+                    itemId={wishlist.id} 
+                    isPrivate={!wishlist.isPublic}
+                    onOpenGiftModal={openGiftModal}
+                    onOpenWishlistModal={openWishlistModal}
+                  />
                 </div>
                 
                 <CardHeader className="pb-2">
@@ -169,7 +167,7 @@ const Wishlists = () => {
                     <Button 
                       variant="ghost" 
                       size="icon" 
-                      onClick={() => console.log(`View wishlist ${wishlist.id}`)}
+                      onClick={() => window.location.href = `/wishlists/${wishlist.id}`}
                     >
                       <Eye className="h-4 w-4" />
                     </Button>
