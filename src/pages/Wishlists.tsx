@@ -1,8 +1,9 @@
+
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Gift, ListPlus, Plus, Star, Lock, Info, Bookmark, Eye } from "lucide-react";
+import { Gift, ListPlus, Plus, Star, Lock, Info, Bookmark, Eye, MoreVertical } from "lucide-react";
 import WishlistModal from "@/components/WishlistModal";
 import GiftModal from "@/components/GiftModal";
 import ItemDropdownMenu from "@/components/ui/item-dropdown-menu";
@@ -117,7 +118,7 @@ const Wishlists = () => {
         {wishlists.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
             {wishlists.map((wishlist) => (
-              <Card key={wishlist.id} className="overflow-hidden transition-all duration-200 hover:shadow-lg hover:-translate-y-1">
+              <Card key={wishlist.id} className="overflow-hidden transition-all duration-200 hover:shadow-lg hover:-translate-y-1 relative">
                 <div className="h-32 bg-blue-100 relative">
                   {wishlist.headerImage && (
                     <img 
@@ -141,14 +142,16 @@ const Wishlists = () => {
                     )}
                   </div>
                   
-                  {/* Dropdown Menu Positioned in the top-right corner */}
-                  <ItemDropdownMenu 
-                    type="wishlist" 
-                    itemId={wishlist.id} 
-                    isPrivate={!wishlist.isPublic}
-                    onOpenGiftModal={openGiftModal}
-                    onOpenWishlistModal={openWishlistModal}
-                  />
+                  {/* Dropdown Menu Positioned in the top-right corner with explicit styling */}
+                  <div className="absolute top-3 right-3 z-20">
+                    <ItemDropdownMenu 
+                      type="wishlist" 
+                      itemId={wishlist.id} 
+                      isPrivate={!wishlist.isPublic}
+                      onOpenGiftModal={openGiftModal}
+                      onOpenWishlistModal={openWishlistModal}
+                    />
+                  </div>
                 </div>
                 
                 <CardHeader className="pb-2">

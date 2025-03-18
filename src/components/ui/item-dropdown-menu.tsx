@@ -121,13 +121,17 @@ const ItemDropdownMenu = ({
         <Button 
           variant="outline" 
           size="icon" 
-          className="h-8 w-8 rounded-full border border-gray-200 bg-white hover:bg-gray-100 absolute right-2 top-2 z-10"
+          className="h-8 w-8 bg-gray-200 hover:bg-gray-300 border border-gray-300 rounded-full flex items-center justify-center p-0"
         >
           <MoreVertical className="h-4 w-4" />
           <span className="sr-only">Open menu</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align={align} side={side} className="w-56 bg-white shadow-md z-50">
+      <DropdownMenuContent 
+        align={align} 
+        side={side} 
+        className="w-56 bg-white shadow-lg rounded-md border border-gray-200 z-50"
+      >
         <DropdownMenuItem onClick={handleViewItem} className="cursor-pointer">
           <ExternalLink className="mr-2 h-4 w-4" />
           <span>View {type === 'wishlist' ? 'Wishlist' : 'Gift'}</span>
