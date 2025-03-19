@@ -1,11 +1,14 @@
 
 // Initialize the page functionality for wishlists
 document.addEventListener('DOMContentLoaded', () => {
-  // Handle wishlist card clicks
+  // Handle wishlist card clicks - navigate to wishlist detail page
   const wishlistCards = document.querySelectorAll('.wishlist-card');
   wishlistCards.forEach(card => {
     card.addEventListener('click', (e) => {
-      if (!e.target.closest('.item-dropdown-menu') && !e.target.closest('[data-dropdown]')) {
+      // Only navigate if the click wasn't on a dropdown or other interactive element
+      if (!e.target.closest('[data-dropdown]') && 
+          !e.target.closest('a') && 
+          !e.target.closest('button')) {
         const wishlistId = card.dataset.wishlistId;
         window.location.href = `/wishlists/${wishlistId}`;
       }
