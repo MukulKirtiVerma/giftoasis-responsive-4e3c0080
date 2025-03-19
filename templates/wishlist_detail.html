@@ -30,33 +30,14 @@
                     </div>
                 {% endif %}
                 
-                {% if wishlist.user_id == current_user.id %}
-                    <div class="absolute top-4 right-4 space-x-2">
-                        <a href="{{ url_for('wishlists.edit_wishlist', wishlist_id=wishlist.id) }}" class="inline-block bg-white text-purple-600 px-4 py-2 rounded shadow hover:bg-purple-50">
-                            Edit
-                        </a>
-                        <button class="inline-block bg-white text-gray-700 px-4 py-2 rounded shadow hover:bg-red-50 hover:text-red-600" 
-                                onclick="document.getElementById('delete-modal').classList.remove('hidden')">
-                            Delete
-                        </button>
-                    </div>
-                {% else %}
-                    <div class="absolute top-4 right-4">
-                        {% if is_bookmarked %}
-                            <form method="POST" action="{{ url_for('wishlists.remove_bookmark', wishlist_id=wishlist.id) }}">
-                                <button type="submit" class="bg-white text-purple-600 px-4 py-2 rounded shadow hover:bg-purple-50">
-                                    Remove Bookmark
-                                </button>
-                            </form>
-                        {% else %}
-                            <form method="POST" action="{{ url_for('wishlists.add_bookmark', wishlist_id=wishlist.id) }}">
-                                <button type="submit" class="bg-white text-purple-600 px-4 py-2 rounded shadow hover:bg-purple-50">
-                                    Bookmark
-                                </button>
-                            </form>
-                        {% endif %}
-                    </div>
-                {% endif %}
+                <!-- Dropdown Menu container for wishlist -->
+                <div 
+                  class="absolute top-4 right-4 z-50" 
+                  data-dropdown="item-menu"
+                  data-type="wishlist"
+                  data-item-id="{{ wishlist.id }}"
+                  data-is-private="{{ 'true' if not wishlist.is_public else 'false' }}"
+                ></div>
             </div>
             
             <div class="p-6">
@@ -97,8 +78,8 @@
                 {% if gifts %}
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {% for gift in gifts %}
-                            <div class="bg-white border rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
-                                <div class="h-48 bg-gray-100 overflow-hidden">
+                            <div class="bg-white border rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow relative">
+                                <div class="h-48 bg-gray-100 overflow-hidden relative">
                                     {% if gift.image_url %}
                                         <img src="{{ gift.image_url }}" alt="{{ gift.name }}" class="w-full h-full object-cover">
                                     {% else %}
@@ -108,6 +89,14 @@
                                             </span>
                                         </div>
                                     {% endif %}
+                                    
+                                    <!-- Dropdown Menu for gift -->
+                                    <div 
+                                      class="absolute top-3 right-3 z-50" 
+                                      data-dropdown="item-menu"
+                                      data-type="gift"
+                                      data-item-id="{{ gift.id }}"
+                                    ></div>
                                 </div>
                                 <div class="p-4">
                                     <h3 class="text-lg font-semibold mb-1">{{ gift.name }}</h3>
@@ -134,34 +123,6 @@
                                             <a href="{{ url_for('gifts.gift_detail', gift_id=gift.id) }}" class="text-gray-500 hover:text-purple-600" title="View details">
                                                 <i class="fas fa-info-circle"></i>
                                             </a>
-                                            
-                                            {% if wishlist.user_id == current_user.id %}
-                                                <form method="POST" action="{{ url_for('wishlists.remove_from_wishlist', wishlist_id=wishlist.id, gift_id=gift.id) }}" class="inline">
-                                                    <button type="submit" class="text-gray-500 hover:text-red-600" title="Remove from wishlist">
-                                                        <i class="fas fa-trash-alt"></i>
-                                                    </button>
-                                                </form>
-                                            {% elif wishlist.user_id != current_user.id %}
-                                                {% set item = gift_items.get(gift.id) %}
-                                                {% if item and item.status == 'available' %}
-                                                    <form method="POST" action="{{ url_for('wishlists.reserve_gift', wishlist_id=wishlist.id, gift_id=gift.id) }}" class="inline">
-                                                        <button type="submit" class="text-gray-500 hover:text-green-600" title="Reserve this gift">
-                                                            <i class="fas fa-bookmark"></i>
-                                                        </button>
-                                                    </form>
-                                                {% elif item and item.status == 'reserved' and item.reserved_by == current_user.id %}
-                                                    <form method="POST" action="{{ url_for('wishlists.unreserve_gift', wishlist_id=wishlist.id, gift_id=gift.id) }}" class="inline">
-                                                        <button type="submit" class="text-purple-600 hover:text-gray-500" title="Cancel reservation">
-                                                            <i class="fas fa-bookmark"></i>
-                                                        </button>
-                                                    </form>
-                                                    <form method="POST" action="{{ url_for('wishlists.mark_purchased', wishlist_id=wishlist.id, gift_id=gift.id) }}" class="inline">
-                                                        <button type="submit" class="text-gray-500 hover:text-green-600" title="Mark as purchased">
-                                                            <i class="fas fa-check-circle"></i>
-                                                        </button>
-                                                    </form>
-                                                {% endif %}
-                                            {% endif %}
                                         </div>
                                     </div>
                                 </div>
@@ -200,4 +161,7 @@
         </div>
     </div>
 </div>
+
+<!-- Include JavaScript for dropdown menus -->
+<script src="/js/item-dropdown-menu.js"></script>
 {% endblock %}

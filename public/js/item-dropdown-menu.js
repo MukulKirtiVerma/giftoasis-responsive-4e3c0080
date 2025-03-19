@@ -32,7 +32,7 @@ function initializeDropdownMenus() {
     // Add menu items
     dropdownContent.innerHTML = `
       <div class="py-1">
-        <a href="/wishlists/${itemId}" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+        <a href="/${type === 'wishlist' ? 'wishlists' : 'gifts'}/${itemId}" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2 h-4 w-4">
             <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
             <polyline points="15 3 21 3 21 9"></polyline>
