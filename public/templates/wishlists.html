@@ -1,0 +1,187 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Wishlists - GiftOasis</title>
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+  <div class="container mx-auto py-10 px-4">
+    <div class="max-w-7xl mx-auto">
+      <!-- Header Section -->
+      <div class="flex justify-between items-center mb-8">
+        <h1 class="text-3xl font-bold text-gray-800">My Wishlists</h1>
+      </div>
+
+      <!-- Wish Lists Section -->
+      <div class="mb-8">
+        <div class="bg-gradient-to-r from-blue-100 to-blue-50 rounded-lg shadow-md overflow-hidden">
+          <div class="p-6 relative">
+            <div class="absolute top-4 right-4">
+              <button 
+                id="new-wishlist-btn"
+                class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded flex items-center gap-2"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+                New Wish List
+              </button>
+            </div>
+            
+            <div class="flex items-center mb-4">
+              <div class="mr-4 bg-blue-100 p-3 rounded-full text-blue-600">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-gift"><polyline points="20 12 20 22 4 22 4 12"/><rect width="20" height="5" x="2" y="7"/><line x1="12" x2="12" y1="22" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
+              </div>
+              <div>
+                <h2 class="text-xl font-semibold text-gray-800">My Wish Lists</h2>
+                <p class="text-gray-600">The things I want for myself</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Expert Lists Section -->
+      <div class="mb-12">
+        <div class="bg-gradient-to-r from-purple-100 to-purple-50 rounded-lg shadow-md overflow-hidden">
+          <div class="p-6 relative">
+            <div class="absolute top-4 right-4">
+              <button 
+                id="new-expert-list-btn"
+                class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded flex items-center gap-2"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+                New Expert List
+              </button>
+            </div>
+            
+            <div class="flex items-center mb-4">
+              <div class="mr-4 bg-purple-100 p-3 rounded-full text-purple-600">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-star"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              </div>
+              <div>
+                <h2 class="text-xl font-semibold text-gray-800">My Expert Lists</h2>
+                <p class="text-gray-600">Build lists of your favorite recommendations</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Wishlists Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+        {% for wishlist in wishlists %}
+        <div 
+          class="wishlist-card overflow-hidden transition-all duration-200 hover:shadow-lg hover:-translate-y-1 relative cursor-pointer bg-white rounded-lg border border-gray-200"
+          data-wishlist-id="{{ wishlist.id }}"
+        >
+          <div class="h-32 bg-blue-100 relative">
+            {% if wishlist.header_image %}
+            <img 
+              src="{{ wishlist.header_image }}" 
+              alt="{{ wishlist.name }}" 
+              class="w-full h-full object-cover"
+            />
+            {% endif %}
+            
+            <div class="absolute top-3 left-3 flex gap-2 z-10">
+              {% if wishlist.is_expert_list %}
+              <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-700">
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-star"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                Expert List
+              </span>
+              {% endif %}
+              
+              {% if not wishlist.is_public %}
+              <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-white border border-gray-200">
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-lock"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                Private
+              </span>
+              {% endif %}
+            </div>
+            
+            <!-- Dropdown Menu container -->
+            <div 
+              class="absolute top-3 right-3 z-50" 
+              data-dropdown="item-menu"
+              data-type="wishlist"
+              data-item-id="{{ wishlist.id }}"
+              data-is-private="{{ 'true' if not wishlist.is_public else 'false' }}"
+            ></div>
+          </div>
+          
+          <div class="p-4">
+            <h3 class="text-lg font-medium">{{ wishlist.name }}</h3>
+            {% if wishlist.description %}
+            <p class="text-gray-600 text-sm line-clamp-2 mt-1">{{ wishlist.description }}</p>
+            {% endif %}
+          </div>
+          
+          <div class="px-4 pb-4 flex justify-between items-center">
+            <span class="text-gray-500 text-sm flex items-center">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-gift mr-1"><polyline points="20 12 20 22 4 22 4 12"/><rect width="20" height="5" x="2" y="7"/><line x1="12" x2="12" y1="22" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
+              {{ wishlist.item_count }} items
+            </span>
+            
+            <div class="flex gap-2">
+              <a href="/wishlists/{{ wishlist.id }}" class="p-1 rounded-full hover:bg-gray-100" onclick="event.stopPropagation()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-eye"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+              </a>
+              
+              <a href="/wishlists/{{ wishlist.id }}/add_gift" class="p-1 rounded-full hover:bg-gray-100" onclick="event.stopPropagation()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+              </a>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      
+      <!-- Empty state if no wishlists -->
+      {% if not wishlists %}
+      <div class="bg-white rounded-lg shadow-md p-8 text-center mb-12">
+        <div class="mb-4 text-blue-500">
+          <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-gift mx-auto"><polyline points="20 12 20 22 4 22 4 12"/><rect width="20" height="5" x="2" y="7"/><line x1="12" x2="12" y1="22" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
+        </div>
+        <h3 class="text-xl font-semibold text-gray-800 mb-4">You don't have any wishlists yet</h3>
+        <p class="text-gray-600 mb-6">Create your first wishlist to start saving your favorite gifts.</p>
+        <a href="/wishlists/new" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">
+          Create a Wishlist
+        </a>
+      </div>
+      {% endif %}
+      
+      <!-- Expert Lists Education Section -->
+      <div class="bg-white rounded-lg shadow-md p-8 text-center">
+        <h3 class="text-xl font-semibold text-purple-800 mb-4">Here's Your Chance to Show Off</h3>
+        <p class="text-gray-600 mb-6">Make lists of your best ideas for others</p>
+        
+        <p class="text-gray-600 mb-6 max-w-2xl mx-auto">
+          Are your friends always asking you for advice on what to get? Now you can
+          build lists they can browse for ideas. Whether it's your favorite gear, or even
+          your own products, anyone can add these gifts to their own wish lists.
+        </p>
+        
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+          <a 
+            href="/wishlists/new?expert=true" 
+            class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded"
+          >
+            Create an Expert List
+          </a>
+          <a 
+            href="/learn-more-expert-lists" 
+            class="bg-white hover:bg-gray-100 text-gray-800 border border-gray-300 px-4 py-2 rounded"
+          >
+            Learn More
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/item-dropdown-menu.js"></script>
+  <script src="/js/wishlists.js"></script>
+</body>
+</html>
