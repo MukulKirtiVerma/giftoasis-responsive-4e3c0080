@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Gift, ListPlus, Plus, Star, Lock, Info, Bookmark, Eye, MoreVertical } from "lucide-react";
+import { Gift, ListPlus, Plus, Star, Lock, Info, Bookmark, Eye, MoreVertical, Copy, Trash, Link2 } from "lucide-react";
 import WishlistModal from "@/components/WishlistModal";
 import GiftModal from "@/components/GiftModal";
 import ItemDropdownMenu from "@/components/ui/item-dropdown-menu";
@@ -43,6 +43,7 @@ const Wishlists = () => {
   const [wishlistModalOpen, setWishlistModalOpen] = useState(false);
   const [giftModalOpen, setGiftModalOpen] = useState(false);
   const [selectedWishlistId, setSelectedWishlistId] = useState<number | null>(null);
+  const [hoveredCardId, setHoveredCardId] = useState<number | null>(null);
 
   const openGiftModal = (wishlistId: number) => {
     setSelectedWishlistId(wishlistId);
@@ -126,6 +127,8 @@ const Wishlists = () => {
                 key={wishlist.id} 
                 className="overflow-hidden transition-all duration-200 hover:shadow-lg hover:-translate-y-1 relative cursor-pointer"
                 onClick={() => handleCardClick(wishlist.id)}
+                onMouseEnter={() => setHoveredCardId(wishlist.id)}
+                onMouseLeave={() => setHoveredCardId(null)}
               >
                 <div className="h-32 bg-blue-100 relative">
                   {wishlist.headerImage && (
@@ -150,18 +153,63 @@ const Wishlists = () => {
                     )}
                   </div>
                   
-                  {/* Dropdown Menu with enhanced positioning and z-index */}
+                  {/* Three-dot menu in the bottom right corner */}
                   <div 
-                    className="absolute top-3 right-3 z-50" 
+                    className="absolute bottom-3 right-3 z-50" 
                     onClick={(e) => e.stopPropagation()}
                   >
-                    <ItemDropdownMenu 
-                      type="wishlist" 
-                      itemId={wishlist.id} 
-                      isPrivate={!wishlist.isPublic}
-                      onOpenGiftModal={openGiftModal}
-                      onOpenWishlistModal={openWishlistModal}
-                    />
+                    <div className="relative group">
+                      <Button 
+                        variant="outline" 
+                        size="icon" 
+                        className="h-8 w-8 bg-white hover:bg-gray-100 border border-gray-300 rounded-full flex items-center justify-center p-0"
+                      >
+                        <MoreVertical className="h-4 w-4" />
+                        <span className="sr-only">Options</span>
+                      </Button>
+                      
+                      <div className="absolute right-0 bottom-full mb-2 hidden group-hover:block z-50 bg-white shadow-lg rounded-md border border-gray-200 min-w-[200px]">
+                        <div className="py-1">
+                          <button 
+                            className="w-full text-left flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              const link = `${window.location.origin}/wishlists/${wishlist.id}`;
+                              navigator.clipboard.writeText(link);
+                              alert("Link copied to clipboard!");
+                            }}
+                          >
+                            <Copy className="mr-2 h-4 w-4" />
+                            <span>Copy Link to Clipboard</span>
+                          </button>
+                          
+                          <button 
+                            className="w-full text-left flex items-center px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              // Redirect to delete route
+                              if (confirm("Are you sure you want to delete this wishlist?")) {
+                                window.location.href = `/wishlists/delete/${wishlist.id}`;
+                              }
+                            }}
+                          >
+                            <Trash className="mr-2 h-4 w-4" />
+                            <span>Delete Wish List</span>
+                          </button>
+                          
+                          <button 
+                            className="w-full text-left flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              window.location.href = `/wishlists/${wishlist.id}/toggle_privacy`;
+                            }}
+                          >
+                            <Link2 className="mr-2 h-4 w-4" />
+                            <span>Private Link</span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
                 
@@ -177,18 +225,25 @@ const Wishlists = () => {
                     <Gift className="h-4 w-4 mr-1" /> {wishlist.itemCount} items
                   </span>
                   
+                  {/* View button only appears on hover */}
+                  {hoveredCardId === wishlist.id && (
+                    <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          window.location.href = `/wishlists/${wishlist.id}`;
+                        }}
+                        className="text-blue-600"
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  )}
+                  
+                  {/* Always visible Add Gift button */}
                   <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        window.location.href = `/wishlists/${wishlist.id}`;
-                      }}
-                    >
-                      <Eye className="h-4 w-4" />
-                    </Button>
-                    
                     <Button 
                       variant="ghost" 
                       size="icon"
