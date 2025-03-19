@@ -57,7 +57,7 @@
         {% if my_wishlists %}
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {% for wishlist in my_wishlists %}
-                    <div class="bg-white rounded-lg shadow-md overflow-hidden transition-transform duration-200 hover:shadow-lg hover:-translate-y-1">
+                    <div class="wishlist-card bg-white rounded-lg shadow-md overflow-hidden transition-transform duration-200 hover:shadow-lg hover:-translate-y-1 relative">
                         <div class="h-32 bg-blue-100 relative">
                             {% if wishlist.header_image %}
                                 <img src="{{ wishlist.header_image }}" alt="{{ wishlist.name }}" class="w-full h-full object-cover">
@@ -74,6 +74,28 @@
                                     <i class="fas fa-lock mr-1"></i> Private
                                 </div>
                             {% endif %}
+                            
+                            <!-- Three-dot menu in the bottom right corner of the header image -->
+                            <div class="absolute bottom-3 right-3">
+                                <div class="dropdown-container relative">
+                                    <button class="bg-white hover:bg-gray-100 rounded-full p-1 h-8 w-8 flex items-center justify-center border border-gray-300 dropdown-toggle">
+                                        <i class="fas fa-ellipsis-v text-gray-600"></i>
+                                    </button>
+                                    <div class="dropdown-menu hidden absolute right-0 bottom-full mb-2 bg-white shadow-lg rounded-md w-48 z-50 border border-gray-200">
+                                        <div class="py-1">
+                                            <button class="w-full text-left flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 copy-link-btn" data-wishlist-id="{{ wishlist.id }}">
+                                                <i class="fas fa-copy mr-2"></i> Copy Link to Clipboard
+                                            </button>
+                                            <button class="w-full text-left flex items-center px-4 py-2 text-sm text-red-600 hover:bg-gray-100 delete-wishlist-btn" data-wishlist-id="{{ wishlist.id }}">
+                                                <i class="fas fa-trash-alt mr-2"></i> Delete Wish List
+                                            </button>
+                                            <button class="w-full text-left flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 toggle-privacy-btn" data-wishlist-id="{{ wishlist.id }}">
+                                                <i class="fas fa-link mr-2"></i> Private Link
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                         
                         <div class="p-4">
@@ -85,7 +107,7 @@
                                 <span class="text-gray-500 text-sm">
                                     <i class="fas fa-gift mr-1"></i> {{ wishlist.items|length }} items
                                 </span>
-                                <a href="{{ url_for('wishlists.wishlist_detail', wishlist_id=wishlist.id) }}" class="text-blue-600 hover:text-blue-700 font-medium">
+                                <a href="{{ url_for('wishlists.wishlist_detail', wishlist_id=wishlist.id) }}" class="text-blue-600 hover:text-blue-700 font-medium view-button hidden">
                                     View <i class="fas fa-chevron-right ml-1"></i>
                                 </a>
                             </div>
@@ -261,4 +283,94 @@
         </div>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Show/hide view button on hover
+        const wishlistCards = document.querySelectorAll('.wishlist-card');
+        
+        wishlistCards.forEach(card => {
+            const viewButton = card.querySelector('.view-button');
+            
+            // Show view button on hover
+            card.addEventListener('mouseenter', () => {
+                if (viewButton) viewButton.classList.remove('hidden');
+            });
+            
+            // Hide view button when not hovering
+            card.addEventListener('mouseleave', () => {
+                if (viewButton) viewButton.classList.add('hidden');
+            });
+            
+            // Make the whole card clickable
+            card.addEventListener('click', (e) => {
+                // Only navigate if the click wasn't on the dropdown or its elements
+                if (!e.target.closest('.dropdown-container')) {
+                    const viewLink = card.querySelector('.view-button');
+                    if (viewLink) {
+                        window.location.href = viewLink.getAttribute('href');
+                    }
+                }
+            });
+            
+            // Initialize dropdown menu
+            const toggleBtn = card.querySelector('.dropdown-toggle');
+            const dropdownMenu = card.querySelector('.dropdown-menu');
+            
+            if (toggleBtn && dropdownMenu) {
+                toggleBtn.addEventListener('click', (e) => {
+                    e.stopPropagation(); // Prevent card click
+                    dropdownMenu.classList.toggle('hidden');
+                });
+                
+                // Close dropdown when clicking outside
+                document.addEventListener('click', (e) => {
+                    if (!toggleBtn.contains(e.target)) {
+                        dropdownMenu.classList.add('hidden');
+                    }
+                });
+                
+                // Setup dropdown actions
+                const copyBtn = card.querySelector('.copy-link-btn');
+                if (copyBtn) {
+                    copyBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const wishlistId = copyBtn.getAttribute('data-wishlist-id');
+                        const link = window.location.origin + '/wishlists/' + wishlistId;
+                        
+                        navigator.clipboard.writeText(link)
+                            .then(() => {
+                                alert('Link copied to clipboard!');
+                                dropdownMenu.classList.add('hidden');
+                            })
+                            .catch(() => {
+                                alert('Failed to copy link');
+                            });
+                    });
+                }
+                
+                const deleteBtn = card.querySelector('.delete-wishlist-btn');
+                if (deleteBtn) {
+                    deleteBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const wishlistId = deleteBtn.getAttribute('data-wishlist-id');
+                        
+                        if (confirm('Are you sure you want to delete this wishlist?')) {
+                            window.location.href = '/wishlists/delete/' + wishlistId;
+                        }
+                    });
+                }
+                
+                const privacyBtn = card.querySelector('.toggle-privacy-btn');
+                if (privacyBtn) {
+                    privacyBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const wishlistId = privacyBtn.getAttribute('data-wishlist-id');
+                        window.location.href = '/wishlists/' + wishlistId + '/toggle_privacy';
+                    });
+                }
+            }
+        });
+    });
+</script>
 {% endblock %}

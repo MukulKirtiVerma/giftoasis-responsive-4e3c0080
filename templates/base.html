@@ -4,63 +4,74 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}GiftOasis{% endblock %}</title>
+    <title>{% block title %}GiftOasis - Wishlists Made Easy{% endblock %}</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        .line-clamp-2 {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+    </style>
     {% block head %}{% endblock %}
 </head>
-<body class="min-h-screen bg-gray-50">
-    <header class="fixed top-0 left-0 right-0 bg-white/80 backdrop-blur-md z-50 border-b">
-        <div class="container mx-auto px-4">
-            <div class="flex items-center justify-between h-16">
-                <div class="flex items-center gap-2">
-                    <a href="{{ url_for('main.index') }}" class="flex items-center gap-2">
-                        <i class="fas fa-gift text-purple-600"></i>
-                        <span class="text-xl font-bold text-purple-600">GiftOasis</span>
-                    </a>
-                </div>
+<body class="bg-gray-50 min-h-screen">
+    <header class="bg-white shadow-sm">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex justify-between items-center">
+                <a href="{{ url_for('main.index') }}" class="text-2xl font-bold text-blue-600">GiftOasis</a>
                 
-                <nav class="hidden md:flex items-center gap-6">
-                    <a href="{{ url_for('main.how_it_works') }}" class="text-gray-600 hover:text-purple-600 transition-colors">How it Works</a>
-                    <a href="{{ url_for('main.categories') }}" class="text-gray-600 hover:text-purple-600 transition-colors">Categories</a>
-                    <a href="{{ url_for('gifts.featured') }}" class="text-gray-600 hover:text-purple-600 transition-colors">Featured</a>
+                <nav class="flex items-center space-x-6">
+                    <a href="{{ url_for('main.index') }}" class="text-gray-600 hover:text-blue-600">Home</a>
+                    <a href="{{ url_for('wishlists.wishlists') }}" class="text-gray-600 hover:text-blue-600">My Wishlists</a>
+                    <a href="{{ url_for('users.find_friends') }}" class="text-gray-600 hover:text-blue-600">Find Friends</a>
+                    
                     {% if current_user.is_authenticated %}
-                        <a href="{{ url_for('wishlists.wishlists') }}" class="text-gray-600 hover:text-purple-600 transition-colors">My Wishlists</a>
-                        <a href="{{ url_for('auth.logout') }}" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded">Logout</a>
+                        <div class="relative">
+                            <a href="{{ url_for('notifications.notifications') }}" class="text-gray-600 hover:text-blue-600">
+                                <i class="fas fa-bell"></i>
+                                {% if unread_notifications_count > 0 %}
+                                    <span class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                                        {{ unread_notifications_count }}
+                                    </span>
+                                {% endif %}
+                            </a>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <a href="{{ url_for('users.profile') }}" class="flex items-center text-gray-600 hover:text-blue-600">
+                                <div class="w-8 h-8 bg-blue-100 rounded-full overflow-hidden mr-2">
+                                    {% if current_user.profile_image %}
+                                        <img src="{{ current_user.profile_image }}" alt="{{ current_user.name }}" class="w-full h-full object-cover">
+                                    {% else %}
+                                        <div class="w-full h-full flex items-center justify-center">
+                                            <span class="text-blue-600 font-semibold">{{ current_user.name[0] }}</span>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <span>{{ current_user.name }}</span>
+                            </a>
+                            <a href="{{ url_for('auth.logout') }}" class="text-gray-600 hover:text-blue-600">
+                                <i class="fas fa-sign-out-alt"></i>
+                            </a>
+                        </div>
                     {% else %}
-                        <a href="{{ url_for('auth.login') }}" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded">Login</a>
+                        <a href="{{ url_for('auth.login') }}" class="text-gray-600 hover:text-blue-600">Login</a>
+                        <a href="{{ url_for('auth.signup') }}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">Sign Up</a>
                     {% endif %}
                 </nav>
-                
-                <button class="md:hidden p-2 mobile-menu-button">
-                    <i class="fas fa-bars"></i>
-                </button>
-            </div>
-        </div>
-        
-        <!-- Mobile menu -->
-        <div class="md:hidden hidden mobile-menu">
-            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white border-b">
-                <a href="{{ url_for('main.how_it_works') }}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-purple-600 hover:bg-gray-50">How it Works</a>
-                <a href="{{ url_for('main.categories') }}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-purple-600 hover:bg-gray-50">Categories</a>
-                <a href="{{ url_for('gifts.featured') }}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-purple-600 hover:bg-gray-50">Featured</a>
-                {% if current_user.is_authenticated %}
-                    <a href="{{ url_for('wishlists.wishlists') }}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-purple-600 hover:bg-gray-50">My Wishlists</a>
-                    <a href="{{ url_for('auth.logout') }}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-purple-600 hover:bg-gray-50">Logout</a>
-                {% else %}
-                    <a href="{{ url_for('auth.login') }}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-purple-600 hover:bg-gray-50">Login</a>
-                {% endif %}
             </div>
         </div>
     </header>
-
-    <main class="pt-16">
+    
+    <main>
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
-                <div class="container mx-auto px-4 mt-4">
+                <div class="container mx-auto px-4 py-4">
                     {% for category, message in messages %}
-                        <div class="p-4 mb-4 rounded {% if category == 'danger' %}bg-red-100 text-red-700{% else %}bg-green-100 text-green-700{% endif %}">
-                            {{ message }}
+                        <div class="{{ 'bg-green-100 border-l-4 border-green-500 text-green-700' if category == 'success' else 'bg-red-100 border-l-4 border-red-500 text-red-700' }} p-4 mb-4">
+                            <p>{{ message }}</p>
                         </div>
                     {% endfor %}
                 </div>
@@ -69,62 +80,50 @@
         
         {% block content %}{% endblock %}
     </main>
-
-    <footer class="bg-gray-900 text-white mt-12 py-8">
+    
+    <footer class="bg-gray-800 text-white mt-12 py-8">
         <div class="container mx-auto px-4">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
                 <div>
-                    <h3 class="text-lg font-bold mb-4">GiftOasis</h3>
-                    <p class="text-gray-400">Find the perfect gift for everyone you care about.</p>
+                    <h3 class="text-lg font-semibold mb-4">About GiftOasis</h3>
+                    <p class="text-gray-400">The easiest way to create, share, and manage wish lists for any occasion.</p>
                 </div>
+                
                 <div>
-                    <h3 class="text-lg font-bold mb-4">Quick Links</h3>
+                    <h3 class="text-lg font-semibold mb-4">Quick Links</h3>
                     <ul class="space-y-2">
-                        <li><a href="{{ url_for('main.index') }}" class="text-gray-400 hover:text-white transition-colors">Home</a></li>
-                        <li><a href="{{ url_for('main.categories') }}" class="text-gray-400 hover:text-white transition-colors">Categories</a></li>
-                        <li><a href="{{ url_for('gifts.featured') }}" class="text-gray-400 hover:text-white transition-colors">Featured</a></li>
-                        {% if current_user.is_authenticated %}
-                            <li><a href="{{ url_for('wishlists.wishlists') }}" class="text-gray-400 hover:text-white transition-colors">My Wishlists</a></li>
-                        {% endif %}
+                        <li><a href="{{ url_for('main.index') }}" class="text-gray-400 hover:text-white">Home</a></li>
+                        <li><a href="{{ url_for('main.how_it_works') }}" class="text-gray-400 hover:text-white">How It Works</a></li>
+                        <li><a href="{{ url_for('main.categories') }}" class="text-gray-400 hover:text-white">Categories</a></li>
+                        <li><a href="{{ url_for('main.featured') }}" class="text-gray-400 hover:text-white">Featured Gifts</a></li>
                     </ul>
                 </div>
+                
                 <div>
-                    <h3 class="text-lg font-bold mb-4">Help</h3>
+                    <h3 class="text-lg font-semibold mb-4">My Account</h3>
                     <ul class="space-y-2">
-                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">FAQ</a></li>
-                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Contact Us</a></li>
-                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Privacy Policy</a></li>
+                        <li><a href="{{ url_for('wishlists.wishlists') }}" class="text-gray-400 hover:text-white">My Wishlists</a></li>
+                        <li><a href="{{ url_for('users.profile') }}" class="text-gray-400 hover:text-white">Profile</a></li>
+                        <li><a href="{{ url_for('notifications.notifications') }}" class="text-gray-400 hover:text-white">Notifications</a></li>
+                        <li><a href="{{ url_for('users.find_friends') }}" class="text-gray-400 hover:text-white">Find Friends</a></li>
                     </ul>
                 </div>
+                
                 <div>
-                    <h3 class="text-lg font-bold mb-4">Connect With Us</h3>
-                    <div class="flex space-x-4">
-                        <a href="#" class="text-gray-400 hover:text-white transition-colors"><i class="fab fa-facebook"></i></a>
-                        <a href="#" class="text-gray-400 hover:text-white transition-colors"><i class="fab fa-twitter"></i></a>
-                        <a href="#" class="text-gray-400 hover:text-white transition-colors"><i class="fab fa-instagram"></i></a>
-                    </div>
+                    <h3 class="text-lg font-semibold mb-4">Contact Us</h3>
+                    <p class="text-gray-400">Have questions or feedback? We'd love to hear from you!</p>
+                    <a href="mailto:support@giftoasis.com" class="text-blue-400 hover:text-blue-300 mt-2 inline-block">support@giftoasis.com</a>
                 </div>
             </div>
-            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+            
+            <div class="mt-8 pt-8 border-t border-gray-700 text-center text-gray-400">
                 <p>&copy; 2023 GiftOasis. All rights reserved.</p>
             </div>
         </div>
     </footer>
-
-    <script>
-        // Mobile menu toggle
-        document.addEventListener('DOMContentLoaded', function() {
-            const menuButton = document.querySelector('.mobile-menu-button');
-            const mobileMenu = document.querySelector('.mobile-menu');
-            
-            if (menuButton && mobileMenu) {
-                menuButton.addEventListener('click', function() {
-                    mobileMenu.classList.toggle('hidden');
-                });
-            }
-        });
-    </script>
-
+    
+    <!-- JavaScript Files -->
+    <script src="{{ url_for('static', filename='js/wishlist-cards.js') }}"></script>
     {% block scripts %}{% endblock %}
 </body>
 </html>
