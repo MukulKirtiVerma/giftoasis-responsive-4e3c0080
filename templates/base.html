@@ -41,7 +41,7 @@
                             </a>
                         </div>
                         <div class="flex items-center space-x-2">
-                            <a href="{{ url_for('users.profile') }}" class="flex items-center text-gray-600 hover:text-blue-600">
+                            <a href="{{ url_for('users.user_profile', user_id=current_user.id) }}" class="flex items-center text-gray-600 hover:text-blue-600">
                                 <div class="w-8 h-8 bg-blue-100 rounded-full overflow-hidden mr-2">
                                     {% if current_user.profile_image %}
                                         <img src="{{ current_user.profile_image }}" alt="{{ current_user.name }}" class="w-full h-full object-cover">
@@ -104,7 +104,7 @@
                     <h3 class="text-lg font-semibold mb-4">My Account</h3>
                     <ul class="space-y-2">
                         <li><a href="{{ url_for('wishlists.wishlists') }}" class="text-gray-400 hover:text-white">My Wishlists</a></li>
-                        <li><a href="{{ url_for('users.profile') }}" class="text-gray-400 hover:text-white">Profile</a></li>
+                        <li><a href="{{ url_for('users.user_profile', user_id=current_user.id) if current_user.is_authenticated else url_for('auth.login') }}" class="text-gray-400 hover:text-white">Profile</a></li>
                         <li><a href="{{ url_for('notifications.notifications') }}" class="text-gray-400 hover:text-white">Notifications</a></li>
                         <li><a href="{{ url_for('users.find_friends') }}" class="text-gray-400 hover:text-white">Find Friends</a></li>
                     </ul>
