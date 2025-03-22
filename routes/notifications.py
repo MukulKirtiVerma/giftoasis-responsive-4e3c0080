@@ -1,10 +1,20 @@
 
-from flask import Blueprint, render_template, redirect, url_for, flash, jsonify, request
+from flask import Blueprint, render_template, redirect, url_for, flash, jsonify, request, g
 from flask_login import login_required, current_user
 from models import db, Notification
 from datetime import datetime
 
 notifications_bp = Blueprint('notifications', __name__)
+
+# Context processor to make unread_notifications_count available to all templates
+@notifications_bp.app_context_processor
+def inject_notification_count():
+    unread_count = 0
+    if hasattr(g, 'user') and g.user.is_authenticated:
+        unread_count = Notification.query.filter_by(user_id=g.user.id, is_read=False).count()
+    elif current_user.is_authenticated:
+        unread_count = Notification.query.filter_by(user_id=current_user.id, is_read=False).count()
+    return {'unread_notifications_count': unread_count}
 
 @notifications_bp.route('/notifications')
 @login_required
